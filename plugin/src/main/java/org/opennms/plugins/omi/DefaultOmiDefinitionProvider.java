@@ -31,9 +31,21 @@ package org.opennms.plugins.omi;
 import java.util.Arrays;
 import java.util.List;
 
+import org.antlr.v4.runtime.CharStream;
 import org.opennms.plugins.omi.model.OmiTrapDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultOmiDefinitionProvider implements OmiDefinitionProvider {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultOmiDefinitionProvider.class);
+
+    public DefaultOmiDefinitionProvider() {
+        // This line is here just to validate that we can load antlr in OSGi and
+        // can be removed once we actually start using it
+        LOG.trace("Constant from antlr: {}", CharStream.EOF);
+        LOG.info("DefaultOmiDefinitionProvider initialized.");
+    }
 
     @Override
     public List<OmiTrapDef> getTrapDefs() {

@@ -45,6 +45,11 @@
             <artifactId>org.apache.karaf.shell.core</artifactId>
             <version>${karaf.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>${antlr.version}</version>
+        </dependency>
 
         <!-- Test -->
         <dependency>
