@@ -50,6 +50,9 @@ public class DefaultOmiDefinitionProvider implements OmiDefinitionProvider {
     @Override
     public List<OmiTrapDef> getTrapDefs() {
         // TODO: Parse definitions and build trap defs
-        return Arrays.asList(new OmiTrapDef());
+        final OmiTrapDef trapDef = new OmiTrapDef();
+        trapDef.setLabel("my trap");
+        trapDef.setTrapTypeOid(".1.3.6.1.4.1.99.98.9999.2.0.5");
+        return Arrays.asList(trapDef);
     }
 }

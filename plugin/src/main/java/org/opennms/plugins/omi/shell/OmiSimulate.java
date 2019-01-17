@@ -38,7 +38,7 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.plugins.omi.OmiDefinitionProvider;
-import org.opennms.plugins.omi.OmiSnmpConstants;
+import org.opennms.plugins.omi.snmp.OmiSnmpConstants;
 import org.opennms.plugins.omi.model.OmiTrapDef;
 import org.snmp4j.CommunityTarget;
 import org.snmp4j.PDU;
@@ -46,6 +46,7 @@ import org.snmp4j.Snmp;
 import org.snmp4j.TransportMapping;
 import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.smi.Integer32;
+import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.TimeTicks;
 import org.snmp4j.smi.UdpAddress;
@@ -60,14 +61,16 @@ public class OmiSimulate implements Action {
     private OmiDefinitionProvider omiDefinitionProvider;
 
     @Option(name = "-o", description = "opennms host")
-    private String opennmsHost;
+    private String opennmsHost = "127.0.0.1";
 
     @Override
     public Object execute() throws Exception {
         System.out.println("Generating traps...");
         for (OmiTrapDef trapDef : omiDefinitionProvider.getTrapDefs()) {
+            System.out.println("Generating traps for: " + trapDef.getLabel());
             final List<PDU> pdus = toPDUs(trapDef);
             for (PDU pdu : pdus) {
+                System.out.println("\tSending PDU");
                 sendSnmpTrap(pdu);
             }
         }
@@ -80,15 +83,8 @@ public class OmiSimulate implements Action {
         final PDU trap = new PDU();
         trap.setType(PDU.TRAP);
         trap.add(new VariableBinding(SnmpConstants.sysUpTime, new TimeTicks(1L)));
-        trap.add(new VariableBinding(SnmpConstants.snmpTrapOID, OmiSnmpConstants.rttMonNotification));
-        trap.add(new VariableBinding(OmiSnmpConstants.rttMonCtrlAdminTag, new Integer32(0)));
-        trap.add(new VariableBinding(OmiSnmpConstants.rttMonHistoryCollectionAddress, new Integer32(0)));
-        trap.add(new VariableBinding(OmiSnmpConstants.rttMonReactVar, new Integer32(0)));
-        trap.add(new VariableBinding(OmiSnmpConstants.rttMonReactOccurred, new Integer32(0)));
-        trap.add(new VariableBinding(OmiSnmpConstants.rttMonReactValue, new Integer32(0)));
-        trap.add(new VariableBinding(OmiSnmpConstants.rttMonReactThresholdRising, new Integer32(0)));
-        trap.add(new VariableBinding(OmiSnmpConstants.rttMonReactThresholdFalling, new Integer32(0)));
-        trap.add(new VariableBinding(OmiSnmpConstants.rttMonEchoAdminLSPSelector, new Integer32(0)));
+        trap.add(new VariableBinding(SnmpConstants.snmpTrapOID, new OID(omiTrapDef.getTrapTypeOid())));
+        trap.add(new VariableBinding(new OID(omiTrapDef.getTrapTypeOid()), new Integer32(0)));
 
         return Arrays.asList(trap);
     }

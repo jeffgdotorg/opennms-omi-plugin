@@ -28,16 +28,30 @@
 
 package org.opennms.plugins.omi;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.opennms.integration.api.v1.config.events.AlarmData;
 import org.opennms.integration.api.v1.config.events.EventConfExtension;
 import org.opennms.integration.api.v1.config.events.EventDefinition;
+import org.opennms.integration.api.v1.config.events.LogMessage;
+import org.opennms.integration.api.v1.config.events.LogMsgDestType;
+import org.opennms.integration.api.v1.config.events.Mask;
+import org.opennms.integration.api.v1.config.events.MaskElement;
+import org.opennms.integration.api.v1.config.events.Parameter;
+import org.opennms.integration.api.v1.config.events.Varbind;
+import org.opennms.integration.api.v1.model.Severity;
 import org.opennms.plugins.omi.model.OmiTrapDef;
+import org.opennms.plugins.omi.snmp.TrapHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OmiEventConfExtension implements EventConfExtension {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OmiEventConfExtension.class);
 
     private final OmiDefinitionProvider omiDefinitionProvider;
 
@@ -53,7 +67,120 @@ public class OmiEventConfExtension implements EventConfExtension {
     }
 
     private List<EventDefinition> toEventDefinitions(OmiTrapDef omiTrapDef) {
-        // TODO: Map the OMI world to the OpenNMS world
-        return Collections.emptyList();
+        final Severity severity = Severity.MINOR;
+        final LogMessage logMessage = new LogMessage() {
+            @Override
+            public String getContent() {
+                return omiTrapDef.getLabel();
+            }
+            @Override
+            public LogMsgDestType getDestination() {
+                return LogMsgDestType.LOGNDISPLAY;
+            }
+        };
+        /*
+         <mask>
+         <maskelement>
+            <mename>id</mename>
+            <mevalue>.1.3.6.1.4.1.9.10.17.3</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>generic</mename>
+            <mevalue>6</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>specific</mename>
+            <mevalue>1</mevalue>
+         </maskelement>
+      </mask>
+         */
+
+        TrapHelper.TrapInfo trapInfo = TrapHelper.getTrapInfo(omiTrapDef.getTrapTypeOid());
+        LOG.info("Generated trap info: {}", trapInfo);
+        MaskElement idMask = new MaskElement() {
+            @Override
+            public String getName() {
+                return "id";
+            }
+
+            @Override
+            public List<String> getValues() {
+                // NOTE: Prepend the "." since the toString on the OIDs doesn't add it
+                return Arrays.asList("." + trapInfo.getEnterpriseId().toString());
+            }
+        };
+        MaskElement genericMask = new MaskElement() {
+            @Override
+            public String getName() {
+                return "generic";
+            }
+
+            @Override
+            public List<String> getValues() {
+                return Arrays.asList(Integer.toString(trapInfo.getGeneric()));
+            }
+        };
+        MaskElement specificMask = new MaskElement() {
+            @Override
+            public String getName() {
+                return "specific";
+            }
+
+            @Override
+            public List<String> getValues() {
+                return Arrays.asList(Integer.toString(trapInfo.getSpecific()));
+            }
+        };
+
+        final Mask mask = new Mask() {
+            @Override
+            public List<MaskElement> getMaskElements() {
+                return Arrays.asList(idMask, genericMask, specificMask);
+            }
+
+            @Override
+            public List<Varbind> getVarbinds() {
+                return Collections.emptyList();
+            }
+        };
+
+        EventDefinition def = new EventDefinition() {
+            public int getPriority() {
+                return 1000;
+            }
+
+            public String getUei() {
+                return "uei.opennms.org/omi/trapTest";
+            }
+
+            public String getLabel() {
+                return omiTrapDef.getLabel();
+            }
+
+            public Severity getSeverity() {
+                return severity;
+            }
+
+            public String getDescription() {
+                return omiTrapDef.getLabel();
+            }
+
+            public LogMessage getLogMessage() {
+                return logMessage;
+            }
+
+            public AlarmData getAlarmData() {
+                return null;
+            }
+
+            public Mask getMask() {
+                return mask;
+            }
+
+            public List<Parameter> getParameters() {
+                return Collections.emptyList();
+            }
+        };
+        return Arrays.asList(def);
     }
 }

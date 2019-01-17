@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.plugins.omi;
+package org.opennms.plugins.omi.snmp;
 
 import org.snmp4j.smi.OID;
 

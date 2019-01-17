@@ -29,4 +29,23 @@
 package org.opennms.plugins.omi.model;
 
 public class OmiTrapDef {
+
+    private String label;
+    private String trapTypeOid;
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public String getTrapTypeOid() {
+        return trapTypeOid;
+    }
+
+    public void setTrapTypeOid(String trapTypeOid) {
+        this.trapTypeOid = trapTypeOid;
+    }
 }
