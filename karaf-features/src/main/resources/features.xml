@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features name="openmms-plugins-omi-features" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
+
+    <repository>mvn:org.opennms.integration.api/karaf-features/${opennms.api.version}/xml</repository>
+
+    <feature name="opennms-plugins-omi" description="OpenNMS :: Plugins :: OMI" version="${project.version}">
+        <feature dependency="true">aries-blueprint</feature>
+        <feature dependency="true">shell</feature>
+        <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.snmp4j/${snmp4j.bundle.version}</bundle>
+        <bundle>mvn:org.opennms.plugins.omi/omi-plugin/${project.version}</bundle>
+    </feature>
+
+</features>
