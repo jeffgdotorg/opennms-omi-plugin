@@ -32,7 +32,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.TokenStream;
+
 import org.opennms.plugins.omi.model.OmiTrapDef;
+import org.opennms.plugins.omi.policy.parser.OMiPolicyLexer;
+import org.opennms.plugins.omi.policy.parser.OMiPolicyParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +48,10 @@ public class DefaultOmiDefinitionProvider implements OmiDefinitionProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultOmiDefinitionProvider.class);
 
     public DefaultOmiDefinitionProvider() {
-        // This line is here just to validate that we can load antlr in OSGi and
-        // can be removed once we actually start using it
-        LOG.trace("Constant from antlr: {}", CharStream.EOF);
+        // This line is here just to validate that we can load antlr and our
+    	// parser in OSGi. It can be removed once we actually start using it
+    	LOG.trace("Constant from antlr: {}", CharStream.EOF);
+    	LOG.trace("Constant from our parser: {}", OMiPolicyParser.CHAR);
         LOG.info("DefaultOmiDefinitionProvider initialized.");
     }
 
