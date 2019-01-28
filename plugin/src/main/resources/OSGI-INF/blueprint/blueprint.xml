@@ -19,7 +19,7 @@
     </cm:property-placeholder>
 
     <bean id="omiDefinitionProvider" class="org.opennms.plugins.omi.DefaultOmiDefinitionProvider">
-        <argument index="0" ref="omPolicyRoot"/>
+        <argument index="0" value="${omPolicyRoot}"/>
     </bean>
 
     <!-- Expose this as a service so that it can be used in the Karaf shell command -->

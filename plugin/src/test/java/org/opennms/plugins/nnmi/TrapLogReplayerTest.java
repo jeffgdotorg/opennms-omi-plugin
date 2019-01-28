@@ -84,10 +84,10 @@ public class TrapLogReplayerTest {
         assertThat(vmwVmHBDetectedTrap.getVarbinds(), hasSize(equalTo(3)));
 
         // Now convert these to PDUs
-        PDU ospfOriginateLsaPdu = TrapLogReplayer.toPdu(ospfOriginateLsaTrap);
+        PDU ospfOriginateLsaPdu = trapLogReplayer.toPdu(ospfOriginateLsaTrap);
         assertThat(ospfOriginateLsaPdu, notNullValue());
 
-        PDU vmwVmHBDetectedPdu = TrapLogReplayer.toPdu(vmwVmHBDetectedTrap);
+        PDU vmwVmHBDetectedPdu = trapLogReplayer.toPdu(vmwVmHBDetectedTrap);
         assertThat(vmwVmHBDetectedPdu, notNullValue());
     }
 }

@@ -76,8 +76,6 @@ public class OmiEventConfExtension implements EventConfExtension {
                 .collect(Collectors.toList());
     }
 
-
-
     private List<EventDefinition> toEventDefinitions(OmiTrapDef omiTrapDef) {
         final Severity severity = toOnmsSeverity(omiTrapDef.getSeverity());
         final LogMessage logMessage = new LogMessage() {
@@ -135,7 +133,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             };
             maskElements.add(specificMask);
         }
-        final Mask mask = new Mask() {
+        final Mask mask = maskElements.isEmpty() ? null : new Mask() {
             @Override
             public List<MaskElement> getMaskElements() {
                 return maskElements;
@@ -229,11 +227,16 @@ public class OmiEventConfExtension implements EventConfExtension {
     }
 
     public static Severity toOnmsSeverity(String omiSeverity) {
+        if (omiSeverity == null) {
+            return Severity.INDETERMINATE;
+        }
         return Severity.get(omiSeverity.toLowerCase());
     }
 
-
     public static String replacePlaceholderTokens(String string) {
+        if (string == null) {
+            return null;
+        }
         final Matcher m = PLACEHOLDER_PATTERN.matcher(string);
         boolean result = m.find();
         if (result) {
@@ -249,6 +252,9 @@ public class OmiEventConfExtension implements EventConfExtension {
     }
 
     public static List<String> extractPlaceholderTokens(String string) {
+        if (string == null) {
+            return Collections.emptyList();
+        }
         final List<String> tokens = new ArrayList<>();
         final Matcher m = PLACEHOLDER_PATTERN.matcher(string);
         while(m.find()) {

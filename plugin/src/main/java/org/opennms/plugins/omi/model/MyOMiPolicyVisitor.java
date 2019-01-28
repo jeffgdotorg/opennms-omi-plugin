@@ -51,7 +51,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
         for (ParseTree child : ctx.children) {
             if (lastChild != null) {
                 if ("DESCRIPTION".equals(lastChild.getText())) {
-                    trapDef.setLabel(child.getText());
+                    trapDef.setLabel(nullSafeTrim(child.getText()));
                 }
             }
             lastChild = child;
@@ -131,7 +131,14 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
         if (text == null) {
             return null;
         }
-        return text.replaceAll("\"", "");
+        return nullSafeTrim(text.replaceAll("\"", ""));
+    }
+
+    private static String nullSafeTrim(String text) {
+        if (text == null) {
+            return null;
+        }
+        return text.trim();
     }
 
     // DEBUGGING
