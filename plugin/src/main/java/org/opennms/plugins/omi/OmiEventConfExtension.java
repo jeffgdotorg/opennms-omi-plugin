@@ -28,30 +28,40 @@
 
 package org.opennms.plugins.omi;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.opennms.integration.api.v1.config.events.AlarmData;
+import org.opennms.integration.api.v1.config.events.AlarmType;
 import org.opennms.integration.api.v1.config.events.EventConfExtension;
 import org.opennms.integration.api.v1.config.events.EventDefinition;
 import org.opennms.integration.api.v1.config.events.LogMessage;
 import org.opennms.integration.api.v1.config.events.LogMsgDestType;
+import org.opennms.integration.api.v1.config.events.ManagedObject;
 import org.opennms.integration.api.v1.config.events.Mask;
 import org.opennms.integration.api.v1.config.events.MaskElement;
 import org.opennms.integration.api.v1.config.events.Parameter;
+import org.opennms.integration.api.v1.config.events.UpdateField;
 import org.opennms.integration.api.v1.config.events.Varbind;
 import org.opennms.integration.api.v1.model.Severity;
 import org.opennms.plugins.omi.model.OmiTrapDef;
-import org.opennms.plugins.omi.snmp.TrapHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OmiEventConfExtension implements EventConfExtension {
 
+    public static final String UEI_PREFIX = "uei.opennms.org/omi/";
+
     private static final Logger LOG = LoggerFactory.getLogger(OmiEventConfExtension.class);
+
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("<\\$(\\d+)>");
 
     private final OmiDefinitionProvider omiDefinitionProvider;
 
@@ -66,76 +76,69 @@ public class OmiEventConfExtension implements EventConfExtension {
                 .collect(Collectors.toList());
     }
 
+
+
     private List<EventDefinition> toEventDefinitions(OmiTrapDef omiTrapDef) {
-        final Severity severity = Severity.MINOR;
+        final Severity severity = toOnmsSeverity(omiTrapDef.getSeverity());
         final LogMessage logMessage = new LogMessage() {
             @Override
             public String getContent() {
-                return omiTrapDef.getLabel();
+                return replacePlaceholderTokens(omiTrapDef.getText());
             }
             @Override
             public LogMsgDestType getDestination() {
                 return LogMsgDestType.LOGNDISPLAY;
             }
         };
-        /*
-         <mask>
-         <maskelement>
-            <mename>id</mename>
-            <mevalue>.1.3.6.1.4.1.9.10.17.3</mevalue>
-         </maskelement>
-         <maskelement>
-            <mename>generic</mename>
-            <mevalue>6</mevalue>
-         </maskelement>
-         <maskelement>
-            <mename>specific</mename>
-            <mevalue>1</mevalue>
-         </maskelement>
-      </mask>
-         */
 
-        TrapHelper.TrapInfo trapInfo = TrapHelper.getTrapInfo(omiTrapDef.getTrapTypeOid());
-        LOG.info("Generated trap info: {}", trapInfo);
-        MaskElement idMask = new MaskElement() {
-            @Override
-            public String getName() {
-                return "id";
-            }
 
-            @Override
-            public List<String> getValues() {
-                // NOTE: Prepend the "." since the toString on the OIDs doesn't add it
-                return Arrays.asList("." + trapInfo.getEnterpriseId().toString());
-            }
-        };
-        MaskElement genericMask = new MaskElement() {
-            @Override
-            public String getName() {
-                return "generic";
-            }
+        final List<MaskElement> maskElements = new LinkedList<>();
+        if (omiTrapDef.getEnterpriseId() != null) {
+            final MaskElement idMask = new MaskElement() {
+                @Override
+                public String getName() {
+                    return "id";
+                }
 
-            @Override
-            public List<String> getValues() {
-                return Arrays.asList(Integer.toString(trapInfo.getGeneric()));
-            }
-        };
-        MaskElement specificMask = new MaskElement() {
-            @Override
-            public String getName() {
-                return "specific";
-            }
+                @Override
+                public List<String> getValues() {
+                    return Collections.singletonList(omiTrapDef.getEnterpriseId());
+                }
+            };
+            maskElements.add(idMask);
+        }
+        if (omiTrapDef.getGeneric() != null) {
+            final MaskElement genericMask = new MaskElement() {
+                @Override
+                public String getName() {
+                    return "generic";
+                }
 
-            @Override
-            public List<String> getValues() {
-                return Arrays.asList(Integer.toString(trapInfo.getSpecific()));
-            }
-        };
+                @Override
+                public List<String> getValues() {
+                    return Collections.singletonList(Integer.toString(omiTrapDef.getGeneric()));
+                }
+            };
+            maskElements.add(genericMask);
+        }
+        if (omiTrapDef.getSpecific() != null) {
+            final MaskElement specificMask = new MaskElement() {
+                @Override
+                public String getName() {
+                    return "specific";
+                }
 
+                @Override
+                public List<String> getValues() {
+                    return Collections.singletonList(Integer.toString(omiTrapDef.getSpecific()));
+                }
+            };
+            maskElements.add(specificMask);
+        }
         final Mask mask = new Mask() {
             @Override
             public List<MaskElement> getMaskElements() {
-                return Arrays.asList(idMask, genericMask, specificMask);
+                return maskElements;
             }
 
             @Override
@@ -144,13 +147,54 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
         };
 
-        EventDefinition def = new EventDefinition() {
+        // Use the placeholder tokens from the text as elements in the reduction key
+        final StringBuilder reductionKeySb = new StringBuilder();
+        reductionKeySb.append("%uei%:%dpname%:%nodeid%");
+        for (String placeholderToken : extractPlaceholderTokens(omiTrapDef.getText())) {
+            reductionKeySb.append(":");
+            reductionKeySb.append(placeholderToken);
+        }
+        final String reductionKey = reductionKeySb.toString();
+
+        final AlarmData alarmData = new AlarmData() {
+            @Override
+            public String getReductionKey() {
+                return reductionKey;
+            }
+
+            @Override
+            public AlarmType getType() {
+                return AlarmType.PROBLEM_WITHOUT_RESOLUTION;
+            }
+
+            @Override
+            public String getClearKey() {
+                return null;
+            }
+
+            @Override
+            public boolean isAutoClean() {
+                return false;
+            }
+
+            @Override
+            public List<UpdateField> getUpdateFields() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public ManagedObject getManagedObject() {
+                return null;
+            }
+        };
+
+        final EventDefinition def = new EventDefinition() {
             public int getPriority() {
                 return 1000;
             }
 
             public String getUei() {
-                return "uei.opennms.org/omi/trapTest";
+                return UEI_PREFIX + omiTrapDef.getLabel();
             }
 
             public String getLabel() {
@@ -170,7 +214,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
 
             public AlarmData getAlarmData() {
-                return null;
+                return alarmData;
             }
 
             public Mask getMask() {
@@ -182,5 +226,34 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
         };
         return Arrays.asList(def);
+    }
+
+    public static Severity toOnmsSeverity(String omiSeverity) {
+        return Severity.get(omiSeverity.toLowerCase());
+    }
+
+
+    public static String replacePlaceholderTokens(String string) {
+        final Matcher m = PLACEHOLDER_PATTERN.matcher(string);
+        boolean result = m.find();
+        if (result) {
+            StringBuffer sb = new StringBuffer();
+            do {
+                m.appendReplacement(sb, String.format("%%parm[#%s]%%", m.group(1)));
+                result = m.find();
+            } while (result);
+            m.appendTail(sb);
+            return sb.toString();
+        }
+        return string;
+    }
+
+    public static List<String> extractPlaceholderTokens(String string) {
+        final List<String> tokens = new ArrayList<>();
+        final Matcher m = PLACEHOLDER_PATTERN.matcher(string);
+        while(m.find()) {
+            tokens.add(String.format("%%parm[#%s]%%", m.group(1)));
+        }
+        return tokens;
     }
 }

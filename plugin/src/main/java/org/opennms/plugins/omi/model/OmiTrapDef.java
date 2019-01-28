@@ -31,6 +31,12 @@ package org.opennms.plugins.omi.model;
 public class OmiTrapDef {
 
     private String label;
+    private String enterpriseId;
+    private Integer generic;
+    private Integer specific;
+    private String severity;
+    private String text;
+
     private String trapTypeOid;
 
     public String getLabel() {
@@ -47,5 +53,45 @@ public class OmiTrapDef {
 
     public void setTrapTypeOid(String trapTypeOid) {
         this.trapTypeOid = trapTypeOid;
+    }
+
+    public String getEnterpriseId() {
+        return enterpriseId;
+    }
+
+    public void setEnterpriseId(String enterpriseId) {
+        this.enterpriseId = enterpriseId;
+    }
+
+    public Integer getGeneric() {
+        return generic;
+    }
+
+    public void setGeneric(Integer generic) {
+        this.generic = generic;
+    }
+
+    public Integer getSpecific() {
+        return specific;
+    }
+
+    public void setSpecific(Integer specific) {
+        this.specific = specific;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 }

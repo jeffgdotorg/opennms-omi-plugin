@@ -31,15 +31,61 @@ package org.opennms.plugins.omi;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.core.IsEqual.equalTo;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.Objects;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.opennms.plugins.omi.model.OmiTrapDef;
+
+import com.google.common.io.Resources;
 
 public class OmiDefinitionProviderTest {
 
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
     @Test
-    public void canProvideDefinitions() {
-        // TODO
-        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider();
-        assertThat(omiDefProvider.getTrapDefs(), hasSize(greaterThanOrEqualTo(0)));
+    public void canProvideDefinitions() throws IOException {
+        final File policyData = temporaryFolder.newFile("policy_data");
+        try (InputStream is = Resources.getResource("policy_data").openStream()) {
+            Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot());
+        final List<OmiTrapDef> trapDefs = omiDefProvider.getTrapDefs();
+
+        // Make sure we have at least 1
+        assertThat(trapDefs, hasSize(greaterThanOrEqualTo(1)));
+
+        // Look for a specific entry
+        OmiTrapDef trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.789", 3, null);
+        assertThat(trapDef, notNullValue());
+        assertThat(trapDef.getLabel(), equalTo("NetApp_Link_Up"));
+        assertThat(trapDef.getSeverity(), equalTo("Normal"));
+        assertThat(trapDef.getText(), equalTo("Link <$1> up."));
+
+        // Look for another specific entry
+        trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.789", 2, null);
+        assertThat(trapDef, notNullValue());
+        assertThat(trapDef.getLabel(), equalTo("NetApp_Link_Down"));
+        assertThat(trapDef.getSeverity(), equalTo("Major"));
+        assertThat(trapDef.getText(), equalTo("Link <$1> down."));
+    }
+
+    private static OmiTrapDef findTrap(List<OmiTrapDef> trapDefs, String enterpriseId, Integer generic, Integer specific) {
+        return trapDefs.stream().filter(t -> Objects.equals(t.getEnterpriseId(), enterpriseId) &&
+                Objects.equals(t.getGeneric(), generic) &&
+                Objects.equals(t.getSpecific(), specific)).findAny().orElse(null);
     }
 }

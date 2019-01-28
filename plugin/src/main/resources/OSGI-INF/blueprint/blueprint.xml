@@ -1,8 +1,27 @@
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0
-        http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+        xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.1.0"
+        xsi:schemaLocation="
+        http://www.osgi.org/xmlns/blueprint/v1.0.0
+        http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
 
-    <bean id="omiDefinitionProvider" class="org.opennms.plugins.omi.DefaultOmiDefinitionProvider"/>
+        http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0
+        http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
+
+        http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.1.0
+        http://aries.apache.org/schemas/blueprint-ext/blueprint-ext-1.1.xsd
+        ">
+
+    <!-- Configuration properties -->
+    <cm:property-placeholder id="omiPluginProperties" persistent-id="org.opennms.plugins.omi" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="omPolicyRoot" value="/opt/OM_policies" />
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <bean id="omiDefinitionProvider" class="org.opennms.plugins.omi.DefaultOmiDefinitionProvider">
+        <argument index="0" ref="omPolicyRoot"/>
+    </bean>
+
     <!-- Expose this as a service so that it can be used in the Karaf shell command -->
     <service interface="org.opennms.plugins.omi.OmiDefinitionProvider" ref="omiDefinitionProvider"/>
 

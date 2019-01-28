@@ -9,6 +9,7 @@
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.snmp4j/${snmp4j.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.antlr/antlr4-runtime/${antlr.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle>mvn:org.opennms.plugins.omi/omi-plugin/${project.version}</bundle>
     </feature>
 
