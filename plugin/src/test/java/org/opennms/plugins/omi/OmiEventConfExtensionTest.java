@@ -53,6 +53,7 @@ import org.opennms.integration.api.v1.config.events.AlarmType;
 import org.opennms.integration.api.v1.config.events.EventDefinition;
 import org.opennms.integration.api.v1.config.events.LogMessage;
 import org.opennms.integration.api.v1.config.events.LogMsgDestType;
+import org.opennms.integration.api.v1.config.events.Parameter;
 import org.opennms.integration.api.v1.model.Severity;
 
 import com.google.common.io.Resources;
@@ -111,6 +112,15 @@ public class OmiEventConfExtensionTest {
         // The reduction key should include all parameters referenced from the label
         assertThat(alarmData.getReductionKey(), equalTo("%uei%:%dpname%:%nodeid%:%parm[#1]%"));
 
+        // Validate that the APPLICATION and MSGGRP tokens got transformed into event parameters
+        List<Parameter> parameters = eventDef.getParameters();
+        assertThat(parameters, hasSize(equalTo(2)));
+        Parameter applicationParameter = findParameter(parameters, "Application");
+        assertThat(applicationParameter.getValue(), equalTo("NetApp"));
+        Parameter msgGrpParameter = findParameter(parameters, "MsgGrp");
+        assertThat(msgGrpParameter.getValue(), equalTo("Storage"));
+
+
         // Look for another specific entry
         eventDef = findEvent(eventDefs, UEI_PREFIX + "NetApp_Link_Down");
         assertThat(eventDef, notNullValue());
@@ -130,9 +140,21 @@ public class OmiEventConfExtensionTest {
         assertThat(alarmData.getType(), equalTo(AlarmType.PROBLEM_WITHOUT_RESOLUTION));
         // The reduction key should include all parameters referenced from the label
         assertThat(alarmData.getReductionKey(), equalTo("%uei%:%dpname%:%nodeid%:%parm[#1]%"));
+
+        // Validate that the APPLICATION and MSGGRP tokens got transformed into event parameters
+        parameters = eventDef.getParameters();
+        assertThat(parameters, hasSize(equalTo(2)));
+        applicationParameter = findParameter(parameters, "Application");
+        assertThat(applicationParameter.getValue(), equalTo("NetApp"));
+        msgGrpParameter = findParameter(parameters, "MsgGrp");
+        assertThat(msgGrpParameter.getValue(), equalTo("Storage"));
     }
 
     private static EventDefinition findEvent(List<EventDefinition> eventDefs, String uei) {
         return eventDefs.stream().filter(e -> Objects.equals(e.getUei(), uei)).findAny().orElse(null);
+    }
+
+    private static Parameter findParameter(List<Parameter> parameters, String name) {
+        return parameters.stream().filter(p -> Objects.equals(p.getName(), name)).findAny().orElse(null);
     }
 }

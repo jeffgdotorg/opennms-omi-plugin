@@ -36,6 +36,9 @@ public class OmiTrapDef {
     private Integer specific;
     private String severity;
     private String text;
+    private String application;
+    private String msgGrp;
+    private String recommendedAction;
 
     private String trapTypeOid;
 
@@ -93,5 +96,29 @@ public class OmiTrapDef {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public String getApplication() {
+        return application;
+    }
+
+    public void setApplication(String application) {
+        this.application = application;
+    }
+
+    public String getMsgGrp() {
+        return msgGrp;
+    }
+
+    public void setMsgGrp(String msgGrp) {
+        this.msgGrp = msgGrp;
+    }
+
+    public String getRecommendedAction() {
+        return recommendedAction;
+    }
+
+    public void setRecommendedAction(String recommendedAction) {
+        this.recommendedAction = recommendedAction;
     }
 }

@@ -186,6 +186,42 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
         };
 
+        final List<Parameter> parameters = new LinkedList<>();
+        if (omiTrapDef.getApplication() != null) {
+            final Parameter applicationParameter = new Parameter() {
+                @Override
+                public String getName() {
+                    return "Application";
+                }
+                @Override
+                public String getValue() {
+                    return omiTrapDef.getApplication();
+                }
+                @Override
+                public boolean shouldExpand() {
+                    return false;
+                }
+            };
+            parameters.add(applicationParameter);
+        }
+        if (omiTrapDef.getMsgGrp() != null) {
+            final Parameter msgGrpParameter = new Parameter() {
+                @Override
+                public String getName() {
+                    return "MsgGrp";
+                }
+                @Override
+                public String getValue() {
+                    return omiTrapDef.getMsgGrp();
+                }
+                @Override
+                public boolean shouldExpand() {
+                    return false;
+                }
+            };
+            parameters.add(msgGrpParameter);
+        }
+
         final EventDefinition def = new EventDefinition() {
             public int getPriority() {
                 return 1000;
@@ -220,7 +256,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
 
             public List<Parameter> getParameters() {
-                return Collections.emptyList();
+                return parameters;
             }
         };
         return Arrays.asList(def);

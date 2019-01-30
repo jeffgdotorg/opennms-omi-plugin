@@ -69,8 +69,10 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             break;
         }
 
-        // Generics and specifics are stored as integers, we need to walk through the children
-        // to associate the ints with the previous child which contains the specifier type (i.e. $G vs $S)
+        // Generics and specifics are stored as integers, we need to walk through the
+        // children
+        // to associate the ints with the previous child which contains the specifier
+        // type (i.e. $G vs $S)
         ParseTree lastChild = null;
         for (ParseTree child : ctx.children) {
             if (lastChild != null) {
@@ -87,7 +89,6 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
         return visitChildren(ctx);
     }
 
-
     @Override
     public T visitSet(OMiPolicyParser.SetContext ctx) {
         ParseTree lastChild = null;
@@ -103,6 +104,14 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                 if ("TEXT".equals(lastChild.getText())) {
                     String text = child.getText();
                     trapDef.setText(stripQuotes(text));
+                }
+                if ("APPLICATION".equals(lastChild.getText())) {
+                    String application = child.getText();
+                    trapDef.setApplication(stripQuotes(application));
+                }
+                if ("MSGGRP".equals(lastChild.getText())) {
+                    String msgGrp = child.getText();
+                    trapDef.setMsgGrp(stripQuotes(msgGrp));
                 }
             }
             lastChild = child;
@@ -126,7 +135,8 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     }
 
     private static String stripQuotes(String text) {
-        // TODO: This could break if the string contains inner quotes that are escaped - but we'll wory about that
+        // TODO: This could break if the string contains inner quotes that are escaped -
+        // but we'll wory about that
         // when it does
         if (text == null) {
             return null;
@@ -150,19 +160,19 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
 
     @Override
     public T visitSnmpdefopts(OMiPolicyParser.SnmpdefoptsContext ctx) {
-        //System.out.println(ctx.getRuleIndex());
+        // System.out.println(ctx.getRuleIndex());
         return visitChildren(ctx);
     }
 
     @Override
     public T visitMsgconds(OMiPolicyParser.MsgcondsContext ctx) {
-        //System.out.println("MSG COND: " + ctx.conds());
+        // System.out.println("MSG COND: " + ctx.conds());
         return visitChildren(ctx);
     }
 
     @Override
     public T visitConds(OMiPolicyParser.CondsContext ctx) {
-        //System.out.println("CONDS: " + ctx.pattern());
+        // System.out.println("CONDS: " + ctx.pattern());
         return visitChildren(ctx);
     }
 
@@ -174,7 +184,8 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
 
     @Override
     public T visitCondition_id(OMiPolicyParser.Condition_idContext ctx) {
-        //System.out.println("Condition ID: " + ctx.stringLiteral().STRING_LITERAL().getText());
+        // System.out.println("Condition ID: " +
+        // ctx.stringLiteral().STRING_LITERAL().getText());
         return visitChildren(ctx);
     }
 
