@@ -83,3 +83,32 @@ WEB LINKS: http://vendor
 GATHER SCRIPTS:
 
 "
+                DESCRIPTION "NetApp_v2c_Spec"
+                CONDITION_ID "8c"
+                CONDITION
+                        $e ".1.3.6.1.4.1.789.0.42"
+                SET
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$23>"
+                        APPLICATION "NetApp"
+                        MSGGRP "Storage"
+                        TEXT "This message is a test of v2c style, for unit testing only"
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: NetApp_v2c_Spec
+
+EVENT TYPE: Network Appliance SNMP trap
+
+DESCRIPTION: NetApp v2c Spec
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert@domain
+
+COMMENTS:
+
+WEB LINKS: http://vendor
+
+GATHER SCRIPTS:
+
+"

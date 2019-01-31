@@ -53,6 +53,7 @@ import org.opennms.integration.api.v1.config.events.AlarmType;
 import org.opennms.integration.api.v1.config.events.EventDefinition;
 import org.opennms.integration.api.v1.config.events.LogMessage;
 import org.opennms.integration.api.v1.config.events.LogMsgDestType;
+import org.opennms.integration.api.v1.config.events.MaskElement;
 import org.opennms.integration.api.v1.config.events.Parameter;
 import org.opennms.integration.api.v1.model.Severity;
 
@@ -148,6 +149,25 @@ public class OmiEventConfExtensionTest {
         assertThat(applicationParameter.getValue(), equalTo("NetApp"));
         msgGrpParameter = findParameter(parameters, "MsgGrp");
         assertThat(msgGrpParameter.getValue(), equalTo("Storage"));
+        
+        // Validate a third entry specified with v2c trap-OID style
+        eventDef = findEvent(eventDefs, UEI_PREFIX + "NetApp_v2c_Spec");
+        assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getLabel(), equalTo("NetApp_v2c_Spec"));
+        assertThat(eventDef.getSeverity(), equalTo(Severity.NORMAL));
+        assertThat(eventDef.getMask(), notNullValue());
+        MaskElement idElem = findMaskElement(eventDef.getMask().getMaskElements(), "id");
+        assertThat(idElem, notNullValue());
+        assertThat(idElem.getValues(), hasSize(equalTo(1)));
+        assertThat(idElem.getValues().get(0), equalTo(".1.3.6.1.4.1.789"));
+        MaskElement genericElem = findMaskElement(eventDef.getMask().getMaskElements(), "generic");
+        assertThat(genericElem, notNullValue());
+        assertThat(genericElem.getValues(), hasSize(equalTo(1)));
+        assertThat(genericElem.getValues().get(0), equalTo("6"));
+        MaskElement specificElem = findMaskElement(eventDef.getMask().getMaskElements(), "specific");
+        assertThat(specificElem, notNullValue());
+        assertThat(specificElem.getValues(), hasSize(equalTo(1)));
+        assertThat(specificElem.getValues().get(0), equalTo("42"));
     }
 
     private static EventDefinition findEvent(List<EventDefinition> eventDefs, String uei) {
@@ -156,5 +176,9 @@ public class OmiEventConfExtensionTest {
 
     private static Parameter findParameter(List<Parameter> parameters, String name) {
         return parameters.stream().filter(p -> Objects.equals(p.getName(), name)).findAny().orElse(null);
+    }
+    
+    private static MaskElement findMaskElement(List<MaskElement> maskElems, String mename) {
+        return maskElems.stream().filter(me -> Objects.equals(me.getName(), mename)).findAny().orElse(null);
     }
 }
