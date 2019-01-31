@@ -91,54 +91,7 @@ public class OmiEventConfExtension implements EventConfExtension {
 
 
         final List<MaskElement> maskElements = new LinkedList<>();
-        final Matcher v2cTrapOidMatcher;
         if (omiTrapDef.getEnterpriseId() != null) {
-            v2cTrapOidMatcher = Pattern.compile("(.*)\\.0\\.(\\d+)$").matcher(omiTrapDef.getEnterpriseId());
-        } else {
-            v2cTrapOidMatcher = Pattern.compile("This will never match").matcher("Told you so");
-        }
-        // If $e looks like a v2c style trap-OID, pick it apart to derive $G and $S
-        if (v2cTrapOidMatcher.matches()) {
-            final String adjustedId = v2cTrapOidMatcher.group(1);
-            final String adjustedGenericType = "6";
-            final String adjustedSpecificType = v2cTrapOidMatcher.group(2);
-            final MaskElement idMask = new MaskElement() {
-                @Override
-                public String getName() {
-                    return "id";
-                }
-                @Override
-                public List<String> getValues() {
-                    return Collections.singletonList(adjustedId);
-                }
-            };
-            maskElements.add(idMask);
-            final MaskElement genericMask = new MaskElement() {
-                @Override
-                public String getName() {
-                    return "generic";
-                }
-                @Override
-                public List<String> getValues() {
-                    return Collections.singletonList(adjustedGenericType);
-                }
-            };
-            maskElements.add(genericMask);
-            final MaskElement specificMask = new MaskElement() {
-                @Override
-                public String getName() {
-                    return "specific";
-                }
-                @Override
-                public List<String> getValues() {
-                    return Collections.singletonList(adjustedSpecificType);
-                }
-            };
-            maskElements.add(specificMask);
-        }
-
-        // If $e does not look like a v2c style trap-OID, take it literally
-        if (!v2cTrapOidMatcher.matches()) {
             final MaskElement idMask = new MaskElement() {
                 @Override
                 public String getName() {
@@ -152,7 +105,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             };
             maskElements.add(idMask);
         }
-        if (!v2cTrapOidMatcher.matches() && omiTrapDef.getGeneric() != null) {
+        if (omiTrapDef.getGeneric() != null) {
             final MaskElement genericMask = new MaskElement() {
                 @Override
                 public String getName() {
@@ -166,7 +119,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             };
             maskElements.add(genericMask);
         }
-        if (!v2cTrapOidMatcher.matches() && omiTrapDef.getSpecific() != null) {
+        if (omiTrapDef.getSpecific() != null) {
             final MaskElement specificMask = new MaskElement() {
                 @Override
                 public String getName() {
@@ -305,7 +258,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             public List<Parameter> getParameters() {
                 return parameters;
             }
-
+            
             public String getOperInstruct() {
                 return omiTrapDef.getRecommendedAction();
             }
