@@ -119,8 +119,7 @@ public class OmiEventConfExtensionTest {
         assertThat(applicationParameter.getValue(), equalTo("NetApp"));
         Parameter msgGrpParameter = findParameter(parameters, "MsgGrp");
         assertThat(msgGrpParameter.getValue(), equalTo("Storage"));
-
-
+        
         // Look for another specific entry
         eventDef = findEvent(eventDefs, UEI_PREFIX + "NetApp_Link_Down");
         assertThat(eventDef, notNullValue());

@@ -38,6 +38,7 @@ public class OmiTrapDef {
     private String text;
     private String application;
     private String msgGrp;
+    private String helpText;
     private String recommendedAction;
 
     private String trapTypeOid;
@@ -114,11 +115,36 @@ public class OmiTrapDef {
         this.msgGrp = msgGrp;
     }
 
+    public String getHelpText() {
+        return helpText;
+    }
+
+    public void setHelpText(String helpText) {
+        this.helpText = helpText;
+    }
+
     public String getRecommendedAction() {
         return recommendedAction;
     }
 
     public void setRecommendedAction(String recommendedAction) {
         this.recommendedAction = recommendedAction;
+    }
+    
+    public String toString() {
+        StringBuilder sb = new StringBuilder("OmiTrapDef {");
+        sb.append(" label=").append(label)
+            .append(", enterpriseId=").append(enterpriseId)
+            .append(", generic=").append(generic)
+            .append(", specific=").append(specific)
+            .append(", severity=").append(severity)
+            .append(", text=").append(text)
+            .append(", application=").append(application)
+            .append(", msgGrp=").append(msgGrp)
+            .append(", helpText=").append(helpText)
+            .append(", recommendedAction=").append(recommendedAction)
+            .append(", trapTypeOid=").append(trapTypeOid);
+        sb.append("}");
+        return sb.toString();
     }
 }

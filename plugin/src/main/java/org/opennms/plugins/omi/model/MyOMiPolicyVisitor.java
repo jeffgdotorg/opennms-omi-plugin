@@ -96,6 +96,9 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             if (lastChild != null) {
                 if ("HELPTEXT".equals(lastChild.getText())) {
                     String helpText = child.getText();
+                    trapDef.setHelpText(stripQuotes(helpText));
+                    // TODO does this belong elsewhere? Can we count on HELPTEXT always being the last child of a SET?
+                    pushTrapDef();
                 }
                 if ("SEVERITY".equals(lastChild.getText())) {
                     String severity = child.getText();
@@ -119,12 +122,6 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
         return visitChildren(ctx);
     }
 
-    @Override
-    public T visitNotification(OMiPolicyParser.NotificationContext ctx) {
-        pushTrapDef();
-        return visitChildren(ctx);
-    }
-
     private void pushTrapDef() {
         trapDefs.add(trapDef);
         trapDef = new OmiTrapDef();
@@ -136,7 +133,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
 
     private static String stripQuotes(String text) {
         // TODO: This could break if the string contains inner quotes that are escaped -
-        // but we'll wory about that
+        // but we'll worry about that
         // when it does
         if (text == null) {
             return null;

@@ -33,6 +33,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.Matchers.startsWith;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,6 +75,9 @@ public class OmiDefinitionProviderTest {
         assertThat(trapDef.getLabel(), equalTo("NetApp_Link_Up"));
         assertThat(trapDef.getSeverity(), equalTo("Normal"));
         assertThat(trapDef.getText(), equalTo("Link <$1> up."));
+        assertThat(trapDef.getApplication(), equalTo("NetApp"));
+        assertThat(trapDef.getMsgGrp(), equalTo("Storage"));
+        assertThat(trapDef.getHelpText(), startsWith("EVENT NAME: NetApp_Link_Up"));
 
         // Look for another specific entry
         trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.789", 2, null);
@@ -81,6 +85,9 @@ public class OmiDefinitionProviderTest {
         assertThat(trapDef.getLabel(), equalTo("NetApp_Link_Down"));
         assertThat(trapDef.getSeverity(), equalTo("Major"));
         assertThat(trapDef.getText(), equalTo("Link <$1> down."));
+        assertThat(trapDef.getApplication(), equalTo("NetApp"));
+        assertThat(trapDef.getMsgGrp(), equalTo("Storage"));
+        assertThat(trapDef.getHelpText(), startsWith("EVENT NAME: NetApp_Link_Down"));
     }
 
     private static OmiTrapDef findTrap(List<OmiTrapDef> trapDefs, String enterpriseId, Integer generic, Integer specific) {
