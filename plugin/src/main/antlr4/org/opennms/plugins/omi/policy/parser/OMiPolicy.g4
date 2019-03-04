@@ -692,14 +692,14 @@ FLOAT
         | ('+'|'-')?'.' ('0'..'9')+ EXPONENT?
         | ('+'|'-')?('0'..'9')+ EXPONENT
         ;
+STRING_LITERAL
+        : '"' .*? '"'
+        ;
 WS      : ( ' '
         | '\t'
         | '\r'
         | '\n'
         ) -> skip
-        ;
-STRING_LITERAL
-        : '"' ( ~('\\'|'"') | ESC_SEQ )* '"'
         ;
 CHAR:  '\'' ( ESC_SEQ | ~('\''|'\\') ) '\''
         ;
