@@ -79,8 +79,8 @@ public class OmiEventConfExtensionTest {
 
     @Test
     public void canProvideDefinitions() throws IOException {
-        final File policyData = temporaryFolder.newFile("policy_data");
-        try (InputStream is = Resources.getResource("policy_data").openStream()) {
+        final File policyData = temporaryFolder.newFile("netapp_test_policy_data");
+        try (InputStream is = Resources.getResource("netapp_test_policy_data").openStream()) {
             Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
