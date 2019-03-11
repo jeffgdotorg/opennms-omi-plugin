@@ -38,6 +38,13 @@ import org.opennms.plugins.omi.policy.parser.OMiPolicyParser;
 public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     private List<OmiTrapDef> trapDefs = new LinkedList<>();
     private OmiTrapDef trapDef = new OmiTrapDef();
+    
+    private String curSourceLabel;
+    private String curSeverity;
+    private String curApplication;
+    private String curMsgGrp;
+    private String curObject;
+    private MatchType curMatchType;
 
     @Override
     public T visitCondition_description(OMiPolicyParser.Condition_descriptionContext ctx) {
@@ -48,6 +55,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     @Override
     public T visitSnmpmsgconds(OMiPolicyParser.SnmpmsgcondsContext ctx) {
         ParseTree lastChild = null;
+        trapDef.setMatchType(MatchType.MSG_MATCH);
         for (ParseTree child : ctx.children) {
             if (lastChild != null) {
                 if ("DESCRIPTION".equals(lastChild.getText())) {

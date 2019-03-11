@@ -28,12 +28,16 @@
 
 package org.opennms.plugins.omi.model;
 
+import java.util.List;
+
 public class OmiTrapDef {
 
+    private MatchType matchType;
     private String label;
     private String enterpriseId;
     private Integer generic;
     private Integer specific;
+    List<VarbindConstraint> varbindConstraints;
     private String severity;
     private String text;
     private String application;
@@ -42,6 +46,14 @@ public class OmiTrapDef {
     private String recommendedAction;
 
     private String trapTypeOid;
+
+    public MatchType getMatchType() {
+        return matchType;
+    }
+
+    public void setMatchType(MatchType matchType) {
+        this.matchType = matchType;
+    }
 
     public String getLabel() {
         return label;
@@ -81,6 +93,15 @@ public class OmiTrapDef {
 
     public void setSpecific(Integer specific) {
         this.specific = specific;
+    }
+
+    public List<VarbindConstraint> getVarbindConstraints() {
+        return varbindConstraints;
+    }
+
+    public void setVarbindConstraints(
+            List<VarbindConstraint> varbindConstraints) {
+        this.varbindConstraints = varbindConstraints;
     }
 
     public String getSeverity() {

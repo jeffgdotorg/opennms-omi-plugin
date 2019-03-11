@@ -1,0 +1,205 @@
+SYNTAX_VERSION 7
+
+
+SNMP "NNMi: Kashya Traps"
+        DESCRIPTION "RecoverPoint Traps"
+        SEVERITY Unknown
+        APPLICATION "RecoverPoint"
+        MSGGRP "Storage"
+        SUPP_UNM_CONDITIONS
+                DESCRIPTION "Suppress_Unmatched_21658"
+                CONDITION_ID "f6d542d8-cd04-71e0-09a6-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.21658"
+        MSGCONDITIONS
+                DESCRIPTION "info_Link_High_Load_Normal"
+                SUPP_DUPL_IDENT_OUTPUT_MSG
+                    "10m"
+                CONDITION_ID "6588f0a2-e520-71e0-0862-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.21658.3.1"
+                        $G 6
+                        $S 1
+                        $10 "Link was in high load, but has now retuned to normal operation."
+                SET
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$32>"
+                        APPLICATION "RecoverPoint"
+                        MSGGRP "Storage"
+                        TEXT "<$8> @ <$3>: <$10>"
+                        OPACTION "escalate_message <$MSG_ID>"
+                        HELPTEXT "EVENT NAME: info_Link_High_Load_Normal
+
+EVENT TYPE: EMC RecoverPoint SNMP trap
+
+DESCRIPTION: An informative event, non critical condition.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: StorageEngineeringandMgmtBranch@uspto.gov
+
+COMMENTS: TSK000000364287 CHG000000498562 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "ca64bd3a-235e-71e2-1447-0a708dfa0000"
+                DESCRIPTION "info"
+                CONDITION_ID "827f37ac-cd06-71e0-09a6-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.21658.3.1"
+                        $G 6
+                        $S 1
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$32>"
+                        APPLICATION "RecoverPoint"
+                        MSGGRP "Storage"
+                        TEXT "<$7> @ <$3>: <$10>"
+                        HELPTEXT "EVENT NAME: info
+
+EVENT TYPE: EMC RecoverPoint SNMP trap
+
+DESCRIPTION: An informative event, non critical condition.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: StorageEngineeringandMgmtBranch@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "ba3665b0-0e83-71e3-12cc-0a708dcc0000"
+                DESCRIPTION "warning"
+                CONDITION_ID "5e02a1a2-cd06-71e0-09a6-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.21658.3.1"
+                        $G 6
+                        $S 2
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$32>"
+                        APPLICATION "RecoverPoint"
+                        MSGGRP "Storage"
+                        TEXT "<$7> @ <$3>: <$10>"
+                        HELPTEXT "EVENT NAME: warning
+
+EVENT TYPE: EMC RecoverPoint SNMP trap
+
+DESCRIPTION: A warning, indicating a non critical problem.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: StorageEngineeringandMgmtBranch@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "ba36d766-0e83-71e3-12cc-0a708dcc0000"
+                DESCRIPTION "error_High_Load"
+                CONDITION_ID "a11bcde2-e935-71e0-0439-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.21658.3.1"
+                        $G 6
+                        $S 3
+                        $10 "High load occurring during group initialization."
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$32>"
+                        APPLICATION "RecoverPoint"
+                        MSGGRP "Storage"
+                        TEXT "<$7> @ <$3>: <$10>"
+                        HELPTEXT "EVENT NAME: error_High_Load
+
+EVENT TYPE: EMC RecoverPoint SNMP trap
+
+DESCRIPTION: An error, indicating a critical problem.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: StorageEngineeringandMgmtBranch@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "ca652112-235e-71e2-1447-0a708dfa0000"
+                DESCRIPTION "error_Link_High_Load"
+                SUPP_DUPL_IDENT_OUTPUT_MSG
+                    "10m"
+                CONDITION_ID "6eb6f8c2-e935-71e0-0439-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.21658.3.1"
+                        $G 6
+                        $S 3
+                        $10 "Link entered high load."
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$32>"
+                        APPLICATION "RecoverPoint"
+                        MSGGRP "Storage"
+                        TEXT "<$7> @ <$3>: <$10>"
+                        HELPTEXT "EVENT NAME: error_Link_High_Load
+
+EVENT TYPE: EMC RecoverPoint SNMP trap
+
+DESCRIPTION: An error, indicating a critical problem.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: StorageEngineeringandMgmtBranch@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "efcb24dc-1f8b-71e2-1447-0a708dfa0000"
+                DESCRIPTION "error"
+                CONDITION_ID "da1ec2a4-cd04-71e0-09a6-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.21658.3.1"
+                        $G 6
+                        $S 3
+                SET
+                        SEVERITY Major
+                        NODE IP 0.0.0.0  "<$24>"
+                        APPLICATION "RecoverPoint"
+                        MSGGRP "Storage"
+                        TEXT "<$7> @ <$3>: <$10>"
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: error
+
+EVENT TYPE: EMC RecoverPoint SNMP trap
+
+DESCRIPTION: An error, indicating a critical problem.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: StorageEngineeringandMgmtBranch@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "ba37592a-0e83-71e3-12cc-0a708dcc0000"
+                DESCRIPTION "Kashya_Generic_Event"
+                CONDITION_ID "da4e5d0c-cd04-71e0-09a6-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.21658"
+                SET
+                        SERVERLOGONLY
+                        APPLICATION "RecoverPoint"
+                        MSGGRP "Storage"
+                        TEXT "<$*>"
