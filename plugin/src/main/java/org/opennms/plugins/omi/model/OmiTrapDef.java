@@ -28,6 +28,7 @@
 
 package org.opennms.plugins.omi.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OmiTrapDef {
@@ -37,7 +38,7 @@ public class OmiTrapDef {
     private String enterpriseId;
     private Integer generic;
     private Integer specific;
-    List<VarbindConstraint> varbindConstraints;
+    List<VarbindConstraint> varbindConstraints = new ArrayList<>();
     private String severity;
     private String text;
     private String application;
@@ -99,9 +100,16 @@ public class OmiTrapDef {
         return varbindConstraints;
     }
 
-    public void setVarbindConstraints(
-            List<VarbindConstraint> varbindConstraints) {
+    public void setVarbindConstraints(List<VarbindConstraint> varbindConstraints) {
         this.varbindConstraints = varbindConstraints;
+    }
+    
+    public void addVarbindConstraint(VarbindConstraint vbc) {
+        varbindConstraints.add(vbc);
+    }
+    
+    public void addVarbindConstraints(List<VarbindConstraint> vbcs) {
+        varbindConstraints.addAll(vbcs);
     }
 
     public String getSeverity() {
@@ -158,6 +166,13 @@ public class OmiTrapDef {
             .append(", enterpriseId=").append(enterpriseId)
             .append(", generic=").append(generic)
             .append(", specific=").append(specific)
+            .append(", varbindConstraints={");
+        if (varbindConstraints != null && !varbindConstraints.isEmpty()) {
+            for (VarbindConstraint vbc : varbindConstraints) {
+                sb.append(vbc.toString()).append(",");
+            }
+        }
+        sb.append("}")
             .append(", severity=").append(severity)
             .append(", text=").append(text)
             .append(", application=").append(application)

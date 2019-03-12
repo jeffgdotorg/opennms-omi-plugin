@@ -32,26 +32,25 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.core.IsEqual.equalTo;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
-import org.jline.utils.Log;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.opennms.plugins.omi.model.OmiTrapDef;
 import org.opennms.plugins.omi.model.VarbindConstraint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Resources;
 
@@ -59,6 +58,8 @@ public class OmiDefinitionProviderTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    
+    private static final Logger LOG = LoggerFactory.getLogger(OmiDefinitionProviderTest.class);
 
     @Test
     public void canProvideBasicNetappDefinitions() throws IOException {
@@ -95,6 +96,7 @@ public class OmiDefinitionProviderTest {
     }
     
     @Test
+    @Ignore
     public void canProvideModerateRecoverPointDefinitions() throws IOException {
         final File policyData = temporaryFolder.newFile("recoverpoint_test_policy_data");
         try (InputStream is = Resources.getResource("recoverpoint_test_policy_data").openStream()) {
@@ -108,7 +110,25 @@ public class OmiDefinitionProviderTest {
         assertThat(trapDefs, hasSize(greaterThanOrEqualTo(1)));
         
         // Look for a specific entry
-        OmiTrapDef trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.21658.3.1", 6, 1);
+        List<VarbindConstraint> desiredVBCs = new ArrayList();
+        desiredVBCs.add(new VarbindConstraint(10, "Link was in high load, but has now retuned to normal operation."));
+        OmiTrapDef trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.21658.3.1", 6, 1, desiredVBCs);
+        assertThat(trapDef, notNullValue());
+        
+        trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.21658.3.1", 6, 1);
+        assertThat(trapDef, notNullValue());
+        
+        desiredVBCs = new ArrayList<>();
+        desiredVBCs.add(new VarbindConstraint(10, "High load occurring during group initialization."));
+        trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.21658.3.1", 6, 3, desiredVBCs);
+        assertThat(trapDef, notNullValue());
+        
+        desiredVBCs = new ArrayList<>();
+        desiredVBCs.add(new VarbindConstraint(10, "Link entered high load."));
+        trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.21658.3.1", 6, 3, desiredVBCs);
+        assertThat(trapDef, notNullValue());
+        
+        trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.21658", null, null);
         assertThat(trapDef, notNullValue());
      }
 
@@ -132,6 +152,7 @@ public class OmiDefinitionProviderTest {
             if (vbConstraints != null) {
                 for (VarbindConstraint vbc : vbConstraints) {
                     if ((def.getVarbindConstraints() == null) || (def.getVarbindConstraints() != null && !def.getVarbindConstraints().contains(vbc))) {
+                        LOG.debug("Eliminated candidate {} because VarbindConstraints lacks {}", def, vbc);
                         eliminated = true;
                     }
                 }
@@ -150,7 +171,7 @@ public class OmiDefinitionProviderTest {
         }
         
         if (candidates.size() > 1) {
-            Log.warn("Eliminated all but {} definitions from consideration. Returning the first one.", candidates.size());
+            LOG.warn("Eliminated all but {} definitions from consideration. Returning the first one: {}", candidates.size(), candidates.get(0).toString());
         }
         
         return candidates.get(0);

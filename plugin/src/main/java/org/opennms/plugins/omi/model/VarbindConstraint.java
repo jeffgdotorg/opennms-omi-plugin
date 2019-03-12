@@ -28,10 +28,6 @@
 
 package org.opennms.plugins.omi.model;
 
-/**
- * @author jeffg
- *
- */
 public class VarbindConstraint {
     private int vbOrdinal;
     private String valueExpression;
@@ -53,7 +49,23 @@ public class VarbindConstraint {
         this.valueExpression = valueExpression;
     }
     
-    public boolean equals(VarbindConstraint other) {
-        return (this.vbOrdinal == other.getVbOrdinal() && this.valueExpression != null && this.valueExpression.equals(other.valueExpression));
+    public boolean equals(Object o) {
+        if (o instanceof VarbindConstraint) {
+            VarbindConstraint other = (VarbindConstraint)o;
+            if (this.vbOrdinal != other.getVbOrdinal()) return false;
+            if (this.valueExpression != null && !this.valueExpression.equals(other.getValueExpression())) return false;
+            if (this.valueExpression == null && other.getValueExpression() != null) return false;
+            if (this.valueExpression != null && other.getValueExpression() == null) return false;
+        }
+        return true;
+    }
+    
+    public String toString() {
+        StringBuilder sb = new StringBuilder("VarbindConstraint{ #");
+        sb.append(vbOrdinal)
+          .append(" = \"")
+          .append(valueExpression)
+          .append(" \" }");
+        return sb.toString();
     }
 }

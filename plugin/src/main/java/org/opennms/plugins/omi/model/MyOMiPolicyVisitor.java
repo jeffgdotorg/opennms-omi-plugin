@@ -30,10 +30,15 @@ package org.opennms.plugins.omi.model;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.jline.utils.Log;
 import org.opennms.plugins.omi.policy.parser.OMiPolicyBaseVisitor;
 import org.opennms.plugins.omi.policy.parser.OMiPolicyParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     private List<OmiTrapDef> trapDefs = new LinkedList<>();
@@ -45,6 +50,10 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     private String curMsgGrp;
     private String curObject;
     private MatchType curMatchType;
+    
+    private final Pattern varbindPattern = Pattern.compile("^\\$([0-9]|1[0-5])$");
+    
+    private static final Logger LOG = LoggerFactory.getLogger(MyOMiPolicyVisitor.class);
 
     @Override
     public T visitCondition_description(OMiPolicyParser.Condition_descriptionContext ctx) {
@@ -89,6 +98,11 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                 }
                 if ("$S".equals(lastChild.getText())) {
                     trapDef.setSpecific(Integer.parseInt(child.getText()));
+                }
+                Matcher vbMatcher = varbindPattern.matcher(lastChild.getText());
+                if (vbMatcher.matches()) {
+                    int vbNumber = Integer.valueOf(vbMatcher.group(1));
+                    trapDef.addVarbindConstraint(new VarbindConstraint(vbNumber, stripQuotes(child.getText())));
                 }
             }
             lastChild = child;
