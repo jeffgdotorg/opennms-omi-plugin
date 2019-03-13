@@ -44,11 +44,12 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     private List<OmiTrapDef> trapDefs = new LinkedList<>();
     private OmiTrapDef trapDef = new OmiTrapDef();
     
-    private String curSourceLabel;
-    private String curSeverity;
-    private String curApplication;
-    private String curMsgGrp;
-    private String curObject;
+    private String defaultSourceName;
+    private String defaultLabel;
+    private String defaultSeverity;
+    private String defaultApplication;
+    private String defaultMsgGrp;
+    private String defaultObject;
     private MatchType curMatchType;
     
     private final Pattern varbindPattern = Pattern.compile("^\\$([0-9]|1[0-5])$");
@@ -58,13 +59,39 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     @Override
     public T visitCondition_description(OMiPolicyParser.Condition_descriptionContext ctx) {
         trapDef.setLabel(stripQuotes(ctx.children.get(1).getText()));
+        
+        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public T visitSnmpsupp_unm_conds(OMiPolicyParser.Snmpsupp_unm_condsContext ctx) {
+        curMatchType = MatchType.SUPP_UNMATCH;
+        return visitChildren(ctx);
+    }
+    
+    @Override
+    public T visitSnmpsuppressconds(OMiPolicyParser.SnmpsuppresscondsContext ctx) {
+        curMatchType = MatchType.SUPP_MATCH;
+        ParseTree lastChild = null;
+        for (ParseTree child : ctx.children) {
+            if (lastChild != null) {
+                if ("DESCRIPTION".equals(lastChild.getText())) {
+                    trapDef.setLabel(nullSafeTrim(child.getText()));
+                    LOG.debug("Visited a suppress-conditions with description '{}'", trapDef.getLabel());
+                }
+            }
+            lastChild = child;
+        }
+        
+        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
         return visitChildren(ctx);
     }
 
     @Override
     public T visitSnmpmsgconds(OMiPolicyParser.SnmpmsgcondsContext ctx) {
+        curMatchType = MatchType.MSG_MATCH;
         ParseTree lastChild = null;
-        trapDef.setMatchType(MatchType.MSG_MATCH);
         for (ParseTree child : ctx.children) {
             if (lastChild != null) {
                 if ("DESCRIPTION".equals(lastChild.getText())) {
@@ -74,6 +101,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             lastChild = child;
         }
 
+        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
         return visitChildren(ctx);
     }
 
@@ -93,6 +121,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
         ParseTree lastChild = null;
         for (ParseTree child : ctx.children) {
             if (lastChild != null) {
+                LOG.debug("Visiting a snmpmsgconds: '{}' '{}'", lastChild.getText(), child.getText());
                 if ("$G".equals(lastChild.getText())) {
                     trapDef.setGeneric(Integer.parseInt(child.getText()));
                 }
@@ -107,7 +136,11 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             }
             lastChild = child;
         }
-
+        if (ctx.equals(ctx.getParent().getChild(ctx.getParent().getChildCount() - 1))) {
+            pushTrapDef();
+        }
+        
+        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
         return visitChildren(ctx);
     }
 
@@ -119,8 +152,6 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                 if ("HELPTEXT".equals(lastChild.getText())) {
                     String helpText = child.getText();
                     trapDef.setHelpText(stripQuotes(helpText));
-                    // TODO does this belong elsewhere? Can we count on HELPTEXT always being the last child of a SET?
-                    pushTrapDef();
                 }
                 if ("SEVERITY".equals(lastChild.getText())) {
                     String severity = child.getText();
@@ -141,11 +172,75 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             }
             lastChild = child;
         }
+        if (ctx.equals(ctx.getParent().getChild(ctx.getParent().getChildCount() - 1))) {
+            pushTrapDef();
+        }
+        
+        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
+        return visitChildren(ctx);
+    }
+
+
+    @Override
+    public T visitSnmpsource(OMiPolicyParser.SnmpsourceContext ctx) {
+        ParseTree lastChild = null;
+        for (ParseTree child : ctx.children) {
+            if (lastChild != null) {
+                LOG.debug("In an snmpsource, visiting tuple '{}' '{}'", lastChild.getText(), child.getText());
+                if ("SNMP".equals(lastChild.getText())) {
+                    defaultSourceName = stripQuotes(child.getText());
+                }
+                if ("DESCRIPTION".equals(lastChild.getText())) {
+                    defaultLabel = stripQuotes(child.getText());
+                }
+                if ("SEVERITY".equals(lastChild.getText())) {
+                    defaultSeverity = nullSafeTrim(child.getText());
+                }
+                if ("APPLICATION".equals(lastChild.getText())) {
+                    defaultApplication = stripQuotes(child.getText());
+                }
+                if ("MSGGRP".equals(lastChild.getText())) {
+                    defaultMsgGrp = stripQuotes(child.getText());
+                }
+            }
+            lastChild = child;
+        }
+        
+        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
+        return visitChildren(ctx);
+    }
+    
+    @Override
+    public T visitStddefault(OMiPolicyParser.StddefaultContext ctx) {
+        ParseTree lastChild = null;
+        for (ParseTree child : ctx.children) {
+            if (lastChild != null) {
+                if ("DESCRIPTION".equals(lastChild.getText())) {
+                    defaultLabel = stripQuotes(child.getText());
+                }
+                if ("SEVERITY".equals(lastChild.getText())) {
+                    defaultSeverity = nullSafeTrim(child.getText());
+                }
+                if ("APPLICATION".equals(lastChild.getText())) {
+                    defaultApplication = stripQuotes(child.getText());
+                }
+                if ("MSGGRP".equals(lastChild.getText())) {
+                    defaultMsgGrp = stripQuotes(child.getText());
+                }
+
+                LOG.debug("In a stddefault, visiting tuple '{}' '{}'", lastChild.getText(), child.getText());
+            }
+            lastChild = child;
+        }
+        
+        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
         return visitChildren(ctx);
     }
 
     private void pushTrapDef() {
+        fillDefaultTrapFields(trapDef);
         trapDefs.add(trapDef);
+        LOG.debug("Pushed OmiTrapDef {}", trapDef.toString());
         trapDef = new OmiTrapDef();
     }
 
@@ -168,19 +263,6 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             return null;
         }
         return text.trim();
-    }
-
-    // DEBUGGING
-
-    @Override
-    public T visitSnmpsource(OMiPolicyParser.SnmpsourceContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public T visitSnmpdefopts(OMiPolicyParser.SnmpdefoptsContext ctx) {
-        // System.out.println(ctx.getRuleIndex());
-        return visitChildren(ctx);
     }
 
     @Override
@@ -211,5 +293,20 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     @Override
     public T visitConditions(OMiPolicyParser.ConditionsContext ctx) {
         return visitChildren(ctx);
+    }
+    
+    private void fillDefaultTrapFields(OmiTrapDef trapDef) {
+        if (trapDef.getApplication() == null) {
+            trapDef.setApplication(defaultApplication);
+        }
+        if (trapDef.getMsgGrp() == null) {
+            trapDef.setMsgGrp(defaultMsgGrp);
+        }
+        if (trapDef.getSeverity() == null) {
+            trapDef.setSeverity(defaultSeverity);
+        }
+        if (trapDef.getMatchType() == null) {
+            trapDef.setMatchType(curMatchType);
+        }
     }
 }

@@ -31,6 +31,9 @@ package org.opennms.plugins.omi.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class OmiTrapDef {
 
     private MatchType matchType;
@@ -44,9 +47,10 @@ public class OmiTrapDef {
     private String application;
     private String msgGrp;
     private String helpText;
-    private String recommendedAction;
 
     private String trapTypeOid;
+    
+    private static final Logger LOG = LoggerFactory.getLogger(OmiTrapDef.class);
 
     public MatchType getMatchType() {
         return matchType;
@@ -151,18 +155,11 @@ public class OmiTrapDef {
     public void setHelpText(String helpText) {
         this.helpText = helpText;
     }
-
-    public String getRecommendedAction() {
-        return recommendedAction;
-    }
-
-    public void setRecommendedAction(String recommendedAction) {
-        this.recommendedAction = recommendedAction;
-    }
     
     public String toString() {
-        StringBuilder sb = new StringBuilder("OmiTrapDef {");
-        sb.append(" label=").append(label)
+        StringBuilder sb = new StringBuilder("OmiTrapDef {")
+            .append(" matchType=").append(matchType == null ? "null" : matchType.toString())
+            .append(", label=").append(label)
             .append(", enterpriseId=").append(enterpriseId)
             .append(", generic=").append(generic)
             .append(", specific=").append(specific)
@@ -177,10 +174,23 @@ public class OmiTrapDef {
             .append(", text=").append(text)
             .append(", application=").append(application)
             .append(", msgGrp=").append(msgGrp)
-            .append(", helpText=").append(helpText)
-            .append(", recommendedAction=").append(recommendedAction)
+            .append(", helpText=").append(makeOneLiner(helpText))
             .append(", trapTypeOid=").append(trapTypeOid);
         sb.append("}");
         return sb.toString();
+    }
+    
+    private static String makeOneLiner(String input) {
+        if (input == null) {
+            return "null";
+        }
+        String output = input;
+        output = input.replaceAll("\n", "[NL]").replaceAll("\r", "[CR]");
+        if (output.length() > 64) {
+            String firstPart = output.substring(0, 30);
+            String lastPart = output.substring(output.length() - 30, output.length());
+            output = firstPart + "…" + lastPart;
+        }
+        return output;
     }
 }

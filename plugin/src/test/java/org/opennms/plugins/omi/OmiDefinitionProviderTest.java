@@ -96,7 +96,6 @@ public class OmiDefinitionProviderTest {
     }
     
     @Test
-    @Ignore
     public void canProvideModerateRecoverPointDefinitions() throws IOException {
         final File policyData = temporaryFolder.newFile("recoverpoint_test_policy_data");
         try (InputStream is = Resources.getResource("recoverpoint_test_policy_data").openStream()) {

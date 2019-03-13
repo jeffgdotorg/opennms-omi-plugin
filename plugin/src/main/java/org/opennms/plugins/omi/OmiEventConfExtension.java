@@ -260,7 +260,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
             
             public String getOperInstruct() {
-                return omiTrapDef.getRecommendedAction();
+                return omiTrapDef.getHelpText();
             }
         };
         return Arrays.asList(def);

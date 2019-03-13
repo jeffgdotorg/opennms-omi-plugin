@@ -14,7 +14,7 @@ SNMP "NNMi: NetApp Traps"
                 DESCRIPTION "Suppress Unmatched .1.3.6.1.4.1.789"
                 CONDITION_ID "8c"
                 CONDITION
-                        $e ".1.3.6.1.4.1.789"
+                        $e ".1.3.6.1.4.1.789.9876"
         SUPPRESSCONDITIONS
                 DESCRIPTION "NetApp_Authentification"
                 CONDITION_ID "8c"
