@@ -426,6 +426,7 @@ set
         | 'NOTIFICATION' notification
         | 'MPI_AGT_COPY_MSG'
         | 'MPI_AGT_DIVERT_MSG'
+        | 'MPI_SV_DIVERT_MSG'
         | 'MPI_AGT_NO_OUTPUT'
         | 'MPI_IMMEDIATE_LOCAL_ACTIONS'
         | 'HELPTEXT' stringLiteral
