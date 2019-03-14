@@ -51,6 +51,7 @@ import org.opennms.integration.api.v1.config.events.Parameter;
 import org.opennms.integration.api.v1.config.events.UpdateField;
 import org.opennms.integration.api.v1.config.events.Varbind;
 import org.opennms.integration.api.v1.model.Severity;
+import org.opennms.plugins.omi.model.MatchType;
 import org.opennms.plugins.omi.model.OmiTrapDef;
 import org.opennms.plugins.omi.model.VarbindConstraint;
 import org.slf4j.Logger;
@@ -72,12 +73,33 @@ public class OmiEventConfExtension implements EventConfExtension {
 
     @Override
     public List<EventDefinition> getEventDefinitions() {
-        return omiDefinitionProvider.getTrapDefs().stream()
-                .flatMap(def -> toEventDefinitions(def).stream())
-                .collect(Collectors.toList());
+        final List<EventDefinition> suppressMatchDefinitions = Collections.emptyList();
+        final List<EventDefinition> msgMatchDefinitions = Collections.emptyList();
+        final List<EventDefinition> suppressUnmatchDefinitions = Collections.emptyList();
+        final List<EventDefinition> msgUnmatchDefinitions = Collections.emptyList();
+        
+        for (OmiTrapDef omiTrapDef : omiDefinitionProvider.getTrapDefs()) {
+            if (omiTrapDef.getMatchType() == MatchType.SUPP_MATCH) {
+                suppressMatchDefinitions.add(toEventDefinition(omiTrapDef));
+            } else if (omiTrapDef.getMatchType() == MatchType.MSG_MATCH) {
+                msgMatchDefinitions.add(toEventDefinition(omiTrapDef));
+            } else if (omiTrapDef.getMatchType() == MatchType.SUPP_UNMATCH) {
+                suppressUnmatchDefinitions.add(toEventDefinition(omiTrapDef));
+            } else if (omiTrapDef.getMatchType() == MatchType.MSG_UNMATCH) {
+                msgUnmatchDefinitions.add(toEventDefinition(omiTrapDef));
+            }
+        }
+        
+        final List<EventDefinition> orderedEventDefinitions = Collections.emptyList();
+        orderedEventDefinitions.addAll(suppressMatchDefinitions);
+        orderedEventDefinitions.addAll(msgMatchDefinitions);
+        orderedEventDefinitions.addAll(suppressUnmatchDefinitions);
+        orderedEventDefinitions.addAll(msgUnmatchDefinitions);
+        
+        return orderedEventDefinitions;
     }
-
-    private List<EventDefinition> toEventDefinitions(OmiTrapDef omiTrapDef) {
+    
+    private EventDefinition toEventDefinition(OmiTrapDef omiTrapDef) {
         final Severity severity = toOnmsSeverity(omiTrapDef.getSeverity());
         final LogMessage logMessage = new LogMessage() {
             @Override
@@ -86,6 +108,21 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
             @Override
             public LogMsgDestType getDestination() {
+                if (omiTrapDef.isServerLogOnly()) {
+                    return LogMsgDestType.LOGONLY;
+                }
+                if (omiTrapDef.getMatchType() == MatchType.MSG_MATCH) {
+                    return LogMsgDestType.LOGNDISPLAY;
+                }
+                if (omiTrapDef.getMatchType() == MatchType.MSG_UNMATCH) {
+                    return LogMsgDestType.LOGNDISPLAY;
+                }
+                if (omiTrapDef.getMatchType() == MatchType.SUPP_MATCH) {
+                    return LogMsgDestType.DONOTPERSIST;
+                }
+                if (omiTrapDef.getMatchType() == MatchType.SUPP_UNMATCH) {
+                    return LogMsgDestType.DONOTPERSIST;
+                }
                 return LogMsgDestType.LOGNDISPLAY;
             }
         };
@@ -300,7 +337,7 @@ public class OmiEventConfExtension implements EventConfExtension {
                 return omiTrapDef.getHelpText();
             }
         };
-        return Arrays.asList(def);
+        return def;
     }
 
     public static Severity toOnmsSeverity(String omiSeverity) {

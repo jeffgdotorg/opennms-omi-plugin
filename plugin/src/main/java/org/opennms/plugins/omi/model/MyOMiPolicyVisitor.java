@@ -173,6 +173,9 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                 if ("OBJECT".equals(lastChild.getText())) {
                     trapDef.setObject(stripQuotes(child.getText()));
                 }
+                if ("SERVERLOGONLY".equals(lastChild.getText())) {
+                    trapDef.setServerLogOnly(true);
+                }
             }
             lastChild = child;
         }

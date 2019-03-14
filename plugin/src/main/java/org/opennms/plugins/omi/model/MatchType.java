@@ -28,7 +28,7 @@
 
 package org.opennms.plugins.omi.model;
 
-enum MatchType {
+public enum MatchType {
     SUPP_UNMATCH (1, "Suppress Unmatched"),
     SUPP_MATCH (2, "Suppress Matched"),
     MSG_MATCH (3, "Message Matched"),
