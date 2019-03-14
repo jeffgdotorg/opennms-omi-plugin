@@ -28,34 +28,50 @@
 
 package org.opennms.plugins.omi.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class VarbindConstraint {
     private int vbOrdinal;
-    private String valueExpression;
+    private List<String> valueExpressions;
     public int getVbOrdinal() {
         return vbOrdinal;
     }
     public void setVbOrdinal(int vbOrdinal) {
         this.vbOrdinal = vbOrdinal;
     }
-    public String getValueExpression() {
-        return valueExpression;
+    public List<String> getValueExpressions() {
+        return valueExpressions;
     }
-    public void setValueExpression(String valueExpression) {
-        this.valueExpression = valueExpression;
+    public void setValueExpressions(List<String> valueExpressions) {
+        this.valueExpressions = valueExpressions;
+    }
+    
+    public void addValueExpression(String valueExpression) {
+        valueExpressions.add(valueExpression);
     }
     
     public VarbindConstraint(final int vbOrdinal, final String valueExpression) {
         this.vbOrdinal = vbOrdinal;
-        this.valueExpression = valueExpression;
+        final List<String> valueExpressions = new ArrayList<>();
+        valueExpressions.add(valueExpression);
+        this.valueExpressions = valueExpressions;
+    }
+    public VarbindConstraint(final int vbOrdinal, final List<String> valueExpressions) {
+        this.vbOrdinal = vbOrdinal;
+        this.valueExpressions = valueExpressions;
     }
     
     public boolean equals(Object o) {
         if (o instanceof VarbindConstraint) {
             VarbindConstraint other = (VarbindConstraint)o;
             if (this.vbOrdinal != other.getVbOrdinal()) return false;
-            if (this.valueExpression != null && !this.valueExpression.equals(other.getValueExpression())) return false;
-            if (this.valueExpression == null && other.getValueExpression() != null) return false;
-            if (this.valueExpression != null && other.getValueExpression() == null) return false;
+            if (this.valueExpressions.size() != other.getValueExpressions().size()) return false;
+            for (int i = 0; i < this.valueExpressions.size(); i++) {
+                if (this.valueExpressions.get(i) != null && !this.valueExpressions.get(i).equals(other.getValueExpressions().get(i))) return false;
+                if (this.valueExpressions.get(i) == null && other.getValueExpressions().get(i) != null) return false;
+                if (this.valueExpressions.get(i) != null && other.getValueExpressions().get(i) == null) return false;
+            }
         }
         return true;
     }
@@ -63,9 +79,17 @@ public class VarbindConstraint {
     public String toString() {
         StringBuilder sb = new StringBuilder("VarbindConstraint{ #");
         sb.append(vbOrdinal)
-          .append(" = \"")
-          .append(valueExpression)
-          .append(" \" }");
+          .append(" = [ ");
+        for (int i = 0; i < valueExpressions.size(); i++) {
+            sb.append("\"")
+              .append(valueExpressions.get(i))
+              .append("\"");
+            if (i < valueExpressions.size() - 1) {
+                sb.append(", ");
+            }
+        }
+          sb.append(" ]")
+          .append(" }");
         return sb.toString();
     }
 }

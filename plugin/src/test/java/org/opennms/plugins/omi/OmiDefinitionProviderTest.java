@@ -109,7 +109,7 @@ public class OmiDefinitionProviderTest {
         assertThat(trapDefs, hasSize(greaterThanOrEqualTo(1)));
         
         // Look for a specific entry
-        List<VarbindConstraint> desiredVBCs = new ArrayList();
+        List<VarbindConstraint> desiredVBCs = new ArrayList<>();
         desiredVBCs.add(new VarbindConstraint(10, "Link was in high load, but has now retuned to normal operation."));
         OmiTrapDef trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.21658.3.1", 6, 1, desiredVBCs);
         assertThat(trapDef, notNullValue());
@@ -130,6 +130,39 @@ public class OmiDefinitionProviderTest {
         trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.21658", null, null);
         assertThat(trapDef, notNullValue());
      }
+    
+    @Test
+    public void canProvideModerateTandbergDefinitions() throws IOException {
+        final File policyData = temporaryFolder.newFile("tandberg_test_policy_data");
+        try (InputStream is = Resources.getResource("tandberg_test_policy_data").openStream()) {
+            Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+        
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot());
+        final List<OmiTrapDef> trapDefs = omiDefProvider.getTrapDefs();
+        
+        // Make sure we have at least 1
+        assertThat(trapDefs, hasSize(greaterThanOrEqualTo(26)));
+        
+        // Look for a specific entry
+        List<VarbindConstraint> desiredVBCs = new ArrayList<>();
+        desiredVBCs.add(new VarbindConstraint(7, "0"));
+        OmiTrapDef trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.5596.110.6.1", 6, 7, desiredVBCs);
+        assertThat(trapDef, notNullValue());
+        
+        desiredVBCs = new ArrayList<>();
+        desiredVBCs.add(new VarbindConstraint(7, "1"));
+        trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.5596.110.6.1", 6, 7, desiredVBCs);
+        assertThat(trapDef, notNullValue());
+        
+        desiredVBCs = new ArrayList<>();
+        desiredVBCs.add(new VarbindConstraint(14, "tmsTrapRogueSystemFound"));
+        trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.5596", null, null, desiredVBCs);
+        assertThat(trapDef, notNullValue());
+        assertThat(trapDef.getObject(), equalTo("<$33>"));
+
+     }
+
 
     private static OmiTrapDef findTrap(List<OmiTrapDef> trapDefs, String enterpriseId, Integer generic, Integer specific) {
         return findTrap(trapDefs, enterpriseId, generic, specific, null);

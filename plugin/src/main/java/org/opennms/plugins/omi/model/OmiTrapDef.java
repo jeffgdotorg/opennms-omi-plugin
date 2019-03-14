@@ -44,9 +44,11 @@ public class OmiTrapDef {
     List<VarbindConstraint> varbindConstraints = new ArrayList<>();
     private String severity;
     private String text;
+    private String object;
     private String application;
     private String msgGrp;
     private String helpText;
+    private boolean serverLogOnly = false;
 
     private String trapTypeOid;
     
@@ -132,6 +134,14 @@ public class OmiTrapDef {
         this.text = text;
     }
 
+    public String getObject() {
+        return object;
+    }
+
+    public void setObject(String object) {
+        this.object = object;
+    }
+
     public String getApplication() {
         return application;
     }
@@ -156,6 +166,14 @@ public class OmiTrapDef {
         this.helpText = helpText;
     }
     
+    public boolean isServerLogOnly() {
+        return serverLogOnly;
+    }
+
+    public void setServerLogOnly(boolean serverLogOnly) {
+        this.serverLogOnly = serverLogOnly;
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder("OmiTrapDef {")
             .append(" matchType=").append(matchType == null ? "null" : matchType.toString())
@@ -172,6 +190,7 @@ public class OmiTrapDef {
         sb.append("}")
             .append(", severity=").append(severity)
             .append(", text=").append(text)
+            .append(", object=").append(object)
             .append(", application=").append(application)
             .append(", msgGrp=").append(msgGrp)
             .append(", helpText=").append(makeOneLiner(helpText))

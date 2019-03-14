@@ -1,0 +1,983 @@
+SYNTAX_VERSION 5
+
+
+SNMP "NNMi: TandBerg Traps"
+        DESCRIPTION "Message Conditions for TandBerg Devices"
+        SEVERITY Unknown
+        APPLICATION "TandBerg"
+        MSGGRP "Video"
+        FORWARDUNMATCHED
+        UNMATCHEDLOGONLY
+        MSGCONDITIONS
+                DESCRIPTION "coldStart_Tandberg"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "ce5ba1ec-4c52-71de-159a-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 0
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$21>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Agent Up with Possible Changes (coldStart Trap)"
+                        HELPTEXT "EVENT NAME: coldStart_Tandberg
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: SNMP Cold Start
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "2ef7ded4-eb8a-71e0-1708-0a708d640000"
+        SUPP_UNM_CONDITIONS
+                DESCRIPTION "Suppress Unmatched .1.3.6.1.4.1.5596"
+                CONDITION_ID "19f0069a-c23b-71dd-18b9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+        MSGCONDITIONS
+                DESCRIPTION "tmsTrapSystemBoot"
+                CONDITION_ID "f332d71e-3687-71e8-1de8-0a708dcc0000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596.110.6.1"
+                        $G 6
+                        $S 1
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$30>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "System just booted. System name in TMS: \"<$9>\". MAC address: \"<$8>\"."
+                        HELPTEXT "EVENT NAME: tmsTrapSystemBoot
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Notification that system has just booted.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS:"
+                        HELP "f332d750-3687-71e8-1de8-0a708dcc0000"
+                DESCRIPTION "tmsTrapLostOrGotResponse_Lost"
+                CONDITION_ID "b2f489fa-368b-71e8-1de8-0a708dcc0000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596.110.6.1"
+                        $G 6
+                        $S 7
+                        $7 "0"
+                SET
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$30>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "TMS has lost connection with system. System name in TMS: \"<$9>\". MAC address: \"<$8>\". Event type value: \"<$4>\"."
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: tmsTrapLostOrGotResponse
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: NNotification that TMS has lost or regained connection with system. tmsIsClearingNotification = 1 if got response 0 if lost
+
+
+1 = sysUpTime
+The time (in hundredths of a second) since the network management portion of the system was last re-initialized.
+
+2 = snmpTrapOID
+The authoritative identification of the notification currently being sent. This variable occurs as the second varbind in every SNMPv2-Trap-PDU and InformRequest-PDU.
+
+3 = tmsAlertLevel
+The alert Level of the event that was thrown.
+
+noAlert = 0
+critical = 1
+major = 2
+minor = 3
+warning = 4
+cleared = 5
+
+
+4 = tmsEventTypeId
+The type of event that was thrown.
+boot = 1
+linkDown = 2
+linkUp = 3
+lowBattery = 6
+lostResponse = 7
+gotResponse = 8
+downspeeding = 9
+authenticationFailure = 18
+
+
+5 = tmsSystemId
+System id
+
+
+6 = tmsSystemIpadress
+System ip address
+
+7 = tmsIsClearingNotification
+0 = new alert, 1 = clear old alert
+
+no = 0
+yes = 1
+
+
+8 = tmsSystemMacAddress
+System MAC address in canonical order as defined by IEEE 802.1a (least significant bit first)
+
+9 = tmsSystemName
+Name of system in TMS
+
+
+RECOMMENDED ACTION: Please check.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS:"
+                        HELP "b2f48a22-368b-71e8-1de8-0a708dcc0000"
+                DESCRIPTION "tmsTrapLostOrGotResponse_Got"
+                CONDITION_ID "b2f48a40-368b-71e8-1de8-0a708dcc0000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596.110.6.1"
+                        $G 6
+                        $S 7
+                        $7 "1"
+                SET
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$30>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "TMS has regained connection with system. System name in TMS: \"<$9>\". MAC address: \"<$8>\". Event type value: \"<$4>\"."
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: tmsTrapLostOrGotResponse
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: NNotification that TMS has lost or regained connection with system. tmsIsClearingNotification = 1 if got response 0 if lost
+
+
+1 = sysUpTime
+The time (in hundredths of a second) since the network management portion of the system was last re-initialized.
+
+2 = snmpTrapOID
+The authoritative identification of the notification currently being sent. This variable occurs as the second varbind in every SNMPv2-Trap-PDU and InformRequest-PDU.
+
+3 = tmsAlertLevel
+The alert Level of the event that was thrown.
+
+noAlert = 0
+critical = 1
+major = 2
+minor = 3
+warning = 4
+cleared = 5
+
+
+4 = tmsEventTypeId
+The type of event that was thrown.
+boot = 1
+linkDown = 2
+linkUp = 3
+lowBattery = 6
+lostResponse = 7
+gotResponse = 8
+downspeeding = 9
+authenticationFailure = 18
+
+
+5 = tmsSystemId
+System id
+
+
+6 = tmsSystemIpadress
+System ip address
+
+7 = tmsIsClearingNotification
+0 = new alert, 1 = clear old alert
+
+no = 0
+yes = 1
+
+
+8 = tmsSystemMacAddress
+System MAC address in canonical order as defined by IEEE 802.1a (least significant bit first)
+
+9 = tmsSystemName
+Name of system in TMS
+
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS:"
+                        HELP "b2f48a4a-368b-71e8-1de8-0a708dcc0000"
+                DESCRIPTION "callModeChange_tms"
+                CONDITION_ID "52ce3014-ef8c-71e5-0c33-0a708dcc0000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 1
+                        $30 "w-tms-10[1|2]"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$30>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Call Mode codec changed to <$1>"
+                        HELPTEXT "EVENT NAME: callModeChange
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Informs of change in Call Mode, whenever a codec goes from Idle
+to Telephone, Videophone, MCU or similar.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS:"
+                        HELP "52ce305a-ef8c-71e5-0c33-0a708dcc0000"
+                DESCRIPTION "callModeChange_vtc"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "439a3014-f065-71e5-0c33-0a708dcc0000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 1
+                        $22 "vtc-"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$22>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Call Mode codec changed to <$1>"
+                        HELPTEXT "EVENT NAME: callModeChange
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Informs of change in Call Mode, whenever a codec goes from Idle
+to Telephone, Videophone, MCU or similar.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS:"
+                        HELP "439a3032-f065-71e5-0c33-0a708dcc0000"
+                DESCRIPTION "callModeChange_.1.3.6.1.4.1.5596"
+                CONDITION_ID "8e479c70-bb2e-71e6-095f-0a708dcc0000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 1
+                        $21 ".1.3.6.1.4.1.5596"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$22>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Call Mode codec changed to <$1>"
+                        HELPTEXT "EVENT NAME: callModeChange
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Informs of change in Call Mode, whenever a codec goes from Idle
+to Telephone, Videophone, MCU or similar.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS:"
+                        HELP "8e479ca2-bb2e-71e6-095f-0a708dcc0000"
+                DESCRIPTION "callModeChange"
+                CONDITION_ID "952bc622-c23c-71dd-18b9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 1
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$21>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Call Mode codec changed to <$1>"
+                        HELPTEXT "EVENT NAME: callModeChange
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Informs of change in Call Mode, whenever a codec goes from Idle
+to Telephone, Videophone, MCU or similar.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS:"
+                        HELP "858b4a72-5386-71e3-1970-0a708dcc0000"
+                DESCRIPTION "callLastError"
+                CONDITION_ID "307a3488-c23d-71dd-18b9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 2
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$21>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Codec Error: <$1>"
+                        HELPTEXT "EVENT NAME: callLastError
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: callLastError has been set with a new message, indicating some kind 
+of Codec problem.
+
+NOTIFICATION: VTCOPS@uspto.gov,NOTE_ONLY
+
+RECOMMENDED ACTION: No action required.
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "307bbdc6-c23d-71dd-18b9-0a708d640000"
+                DESCRIPTION "lowBattery_tms"
+                CONDITION_ID "439a303c-f065-71e5-0c33-0a708dcc0000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 3
+                        $30 "w-tms-10[1|2]"
+                SET
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$30>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Battery is low in the remote control"
+                        AUTOACTION "/bin/true" ACK
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: lowBattery
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Battery is low in the remote control.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "439a3046-f065-71e5-0c33-0a708dcc0000"
+                DESCRIPTION "lowBattery"
+                CONDITION_ID "8c547ab6-c23d-71dd-18b9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 3
+                SET
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$22>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Battery is low in the remote control"
+                        AUTOACTION "/bin/true" ACK
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: lowBattery
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Battery is low in the remote control.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "441d992c-f065-71e5-0c33-0a708dcc0000"
+                DESCRIPTION "downSpeeding"
+                CONDITION_ID "d89704de-c23d-71dd-18b9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 4
+                SET
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$22>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Downspeeding: adjusting connection speed due to problem"
+                        AUTOACTION "/bin/true" ACK
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: downSpeeding
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Downspeeding, adjusting connection speed due to problem.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov,NOTE_ONLY
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "d897192e-c23d-71dd-18b9-0a708d640000"
+                DESCRIPTION "startupgrade"
+                CONDITION_ID "251d9f0c-c23e-71dd-18b9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 5
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$21>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "A codec software upgrade has begun"
+                        HELPTEXT "EVENT NAME: startupgrade
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: A codec software upgrade has begun.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "251dc1c6-c23e-71dd-18b9-0a708d640000"
+                DESCRIPTION "finishedupgrade"
+                CONDITION_ID "5c9a446c-c23e-71dd-18b9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 6
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$21>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "A codec software upgrade has been completed"
+                        HELPTEXT "EVENT NAME: finishedupgrade
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: A codec software upgrade has been completed.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "5c9a5966-c23e-71dd-18b9-0a708d640000"
+                DESCRIPTION "dispbox_tms"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "52ce30a0-ef8c-71e5-0c33-0a708dcc0000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 7
+                        $30 "w-tms-10[1|2]"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$30>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Quick Key selected on display box"
+                        HELPTEXT "EVENT NAME: dispbox
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: When a display box (dispbox) is shown on the codec, and the user
+presses a quick-key, this trap is sent to indicate the quick-key 
+selected.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "52ce30c8-ef8c-71e5-0c33-0a708dcc0000"
+                DESCRIPTION "dispbox"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "bfa55c72-c23e-71dd-18b9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 7
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$21>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Quick Key selected on display box"
+                        HELPTEXT "EVENT NAME: dispbox
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: When a display box (dispbox) is shown on the codec, and the user
+presses a quick-key, this trap is sent to indicate the quick-key 
+selected.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "831b4da4-f710-71e3-07f0-0a708dcc0000"
+                DESCRIPTION "connect_vtc"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "439a305a-f065-71e5-0c33-0a708dcc0000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 8
+                        $24 "vtc-"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$24>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "The call is connected <$2> <$3>"
+                        HELPTEXT "EVENT NAME: connect
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: The call is connected.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "439a3064-f065-71e5-0c33-0a708dcc0000"
+                DESCRIPTION "connect"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "3a71bfb8-c23f-71dd-18b9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 8
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$24>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "The call is connected <$2> <$3>"
+                        HELPTEXT "EVENT NAME: connect
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: The call is connected.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "3a71d1f6-c23f-71dd-18b9-0a708d640000"
+                DESCRIPTION "encryption_tms"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "439a3078-f065-71e5-0c33-0a708dcc0000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 9
+                        $30 "w-tms-10[1|2]"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$30>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Encryption status changed to DES"
+                        HELPTEXT "EVENT NAME: encryption
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Encryption status changed to DES.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "439a3082-f065-71e5-0c33-0a708dcc0000"
+                DESCRIPTION "encryption"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "750394f8-c23f-71dd-18b9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 9
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$21>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Encryption status changed to DES"
+                        HELPTEXT "EVENT NAME: encryption
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Encryption status changed to DES.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "7503a93e-c23f-71dd-18b9-0a708d640000"
+                DESCRIPTION "gatekeeper_reg_failure"
+                CONDITION_ID "b67cd21e-c23f-71dd-18b9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 10
+                SET
+                        SEVERITY Major
+                        NODE IP 0.0.0.0  "<$22>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Gatekeeper registration failure"
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: gatekeeper_reg_failure
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Gatekeeper registration failure.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS:"
+                        HELP "3c191b3a-5386-71e3-1970-0a708dcc0000"
+                DESCRIPTION "gatekeeper_reg_success"
+                CONDITION_ID "997f5c84-f2b3-71e5-0c33-0a708dcc0000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 11
+                SET
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$22>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Gatekeeper registration success <$2>"
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: gatekeeper_reg_success
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Gatekeeper registration success.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "997f5cb6-f2b3-71e5-0c33-0a708dcc0000"
+                DESCRIPTION "disconnect"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "c56d05d6-c240-71dd-18b9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 12
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$24>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "The call is disconnected <$2> <$3>"
+                        HELPTEXT "EVENT NAME: disconnect
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: The call is disconnected.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "3b50e3aa-bcb9-71e6-095f-0a708dcc0000"
+                DESCRIPTION "Connection"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "4cb93574-c240-71dd-18b9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 13
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$24>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Connection <$1>: <$8> "
+                        HELPTEXT "EVENT NAME: Connection
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Connection
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "4cb94776-c240-71dd-18b9-0a708d640000"
+        SUPPRESSCONDITIONS
+                DESCRIPTION "Call"
+                CONDITION_ID "e11c65a4-839d-71df-12f4-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $G 6
+                        $S 16
+        MSGCONDITIONS
+                DESCRIPTION "TandBerg_Rogue_System_Found_Normal"
+                CONDITION_ID "5064a282-921f-71e6-0656-0a708dcd0000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $14 "tmsTrapRogueSystemFound"
+                SET
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$30>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        OBJECT "<$33>"
+                        TEXT "<$14>"
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: Rogue System Found
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: Rogue System Found
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov"
+                        HELP "5064a2b4-921f-71e6-0656-0a708dcd0000"
+                DESCRIPTION "ColdStart"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "f9386906-c5ff-71dd-11cd-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.6.3.1.1.5.1.1.3.6.1.4.1.5596"
+                        $G 0
+                SET
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$22>"
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "Cold Start"
+                        AUTOACTION "/bin/true" ACK
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: ColdStart
+
+EVENT TYPE: TandBerg SNMP trap
+
+DESCRIPTION: TandBerg ColdStart Event.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: VTCOPS@uspto.gov,NOTE_ONLY
+
+COMMENTS: 
+
+WEB LINKS: http://www.tandberg.com/support/video-conferencing-knowledge-base/index.jsp
+
+GATHER SCRIPTS: 
+
+"
+                        HELP "f93b02d8-c5ff-71dd-11cd-0a708d640000"
+        SUPPRESSCONDITIONS
+                DESCRIPTION "TandBerg_TrapLog_Suppress"
+                CONDITION_ID "1ee43b34-416c-71de-15b1-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                        $5 "TrapLog"
+                DESCRIPTION "TandBerg_Unknown_2"
+                CONDITION_ID "8e81a796-1473-71e2-054a-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596.110.6.1"
+                        $G 6
+                        $S 20
+                DESCRIPTION "TandBerg_Unknown_1"
+                CONDITION_ID "dffca49a-1216-71e2-088a-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596.110.6.1"
+                        $G 6
+                        $S 31
+        MSGCONDITIONS
+                DESCRIPTION "TandBerg_Generic_Event"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "d81e2ca2-2913-71de-1eb9-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.5596"
+                SET
+                        SERVERLOGONLY
+                        APPLICATION "TandBerg"
+                        MSGGRP "Video"
+                        TEXT "<$*>"

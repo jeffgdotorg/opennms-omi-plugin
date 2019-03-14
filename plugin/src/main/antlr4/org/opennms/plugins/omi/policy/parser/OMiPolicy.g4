@@ -693,8 +693,12 @@ FLOAT
         | ('+'|'-')?('0'..'9')+ EXPONENT
         ;
 STRING_LITERAL
-        : '"' .*? '"'
+        : '"' (ESC|.)*? '"'
         ;
+fragment
+ESC
+        : '\\"'
+        | '\\\\';
 WS      : ( ' '
         | '\t'
         | '\r'

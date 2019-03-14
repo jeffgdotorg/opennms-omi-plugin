@@ -52,6 +52,7 @@ import org.opennms.integration.api.v1.config.events.UpdateField;
 import org.opennms.integration.api.v1.config.events.Varbind;
 import org.opennms.integration.api.v1.model.Severity;
 import org.opennms.plugins.omi.model.OmiTrapDef;
+import org.opennms.plugins.omi.model.VarbindConstraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,6 +134,25 @@ public class OmiEventConfExtension implements EventConfExtension {
             };
             maskElements.add(specificMask);
         }
+        final List<Varbind> varbinds = Collections.emptyList();
+        if (! omiTrapDef.getVarbindConstraints().isEmpty()) {
+            for (VarbindConstraint dtoVb : omiTrapDef.getVarbindConstraints()) {
+                final Varbind vb = new Varbind() {
+                    public Integer getNumber() {
+                        return dtoVb.getVbOrdinal();
+                    }
+                    public List<String> getValues() {
+                        return dtoVb.getValueExpressions();
+                    }
+                    public String getTextualConvention() {
+                        // TODO should this be null or the empty string?
+                        return null;
+                    }
+                };
+                varbinds.add(vb);
+            }
+        }
+        
         final Mask mask = maskElements.isEmpty() ? null : new Mask() {
             @Override
             public List<MaskElement> getMaskElements() {
@@ -141,7 +161,7 @@ public class OmiEventConfExtension implements EventConfExtension {
 
             @Override
             public List<Varbind> getVarbinds() {
-                return Collections.emptyList();
+                return varbinds;
             }
         };
 
@@ -220,6 +240,23 @@ public class OmiEventConfExtension implements EventConfExtension {
                 }
             };
             parameters.add(msgGrpParameter);
+        }
+        if (omiTrapDef.getObject() != null) {
+            final Parameter objectParameter = new Parameter() {
+                @Override
+                public String getName() {
+                    return "Object";
+                }
+                @Override
+                public String getValue() {
+                    return omiTrapDef.getObject();
+                }
+                @Override
+                public boolean shouldExpand() {
+                    return true;
+                }
+            };
+            parameters.add(objectParameter);
         }
 
         final EventDefinition def = new EventDefinition() {

@@ -50,6 +50,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     private String defaultApplication;
     private String defaultMsgGrp;
     private String defaultObject;
+    private boolean defaultUnmatchedLogOnly = false;
     private MatchType curMatchType;
     
     private final Pattern varbindPattern = Pattern.compile("^\\$([0-9]|1[0-5])$");
@@ -60,7 +61,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     public T visitCondition_description(OMiPolicyParser.Condition_descriptionContext ctx) {
         trapDef.setLabel(stripQuotes(ctx.children.get(1).getText()));
         
-        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
+//        LOG.debug("Visiting children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
         return visitChildren(ctx);
     }
 
@@ -84,7 +85,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             lastChild = child;
         }
         
-        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
+//        LOG.debug("Visiting children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
         return visitChildren(ctx);
     }
 
@@ -101,7 +102,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             lastChild = child;
         }
 
-        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
+//        LOG.debug("Visiting children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
         return visitChildren(ctx);
     }
 
@@ -121,7 +122,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
         ParseTree lastChild = null;
         for (ParseTree child : ctx.children) {
             if (lastChild != null) {
-                LOG.debug("Visiting a snmpmsgconds: '{}' '{}'", lastChild.getText(), child.getText());
+//                LOG.debug("Visiting a snmpmsgconds: '{}' '{}'", lastChild.getText(), child.getText());
                 if ("$G".equals(lastChild.getText())) {
                     trapDef.setGeneric(Integer.parseInt(child.getText()));
                 }
@@ -140,7 +141,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             pushTrapDef();
         }
         
-        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
+//        LOG.debug("Visiting children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
         return visitChildren(ctx);
     }
 
@@ -169,6 +170,9 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                     String msgGrp = child.getText();
                     trapDef.setMsgGrp(stripQuotes(msgGrp));
                 }
+                if ("OBJECT".equals(lastChild.getText())) {
+                    trapDef.setObject(stripQuotes(child.getText()));
+                }
             }
             lastChild = child;
         }
@@ -176,7 +180,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             pushTrapDef();
         }
         
-        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
+//        LOG.debug("Visiting children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
         return visitChildren(ctx);
     }
 
@@ -186,7 +190,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
         ParseTree lastChild = null;
         for (ParseTree child : ctx.children) {
             if (lastChild != null) {
-                LOG.debug("In an snmpsource, visiting tuple '{}' '{}'", lastChild.getText(), child.getText());
+//                LOG.debug("In an snmpsource, visiting tuple '{}' '{}'", lastChild.getText(), child.getText());
                 if ("SNMP".equals(lastChild.getText())) {
                     defaultSourceName = stripQuotes(child.getText());
                 }
@@ -206,7 +210,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             lastChild = child;
         }
         
-        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
+//        LOG.debug("Visiting children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
         return visitChildren(ctx);
     }
     
@@ -227,13 +231,27 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                 if ("MSGGRP".equals(lastChild.getText())) {
                     defaultMsgGrp = stripQuotes(child.getText());
                 }
+                if ("OBJECT".equals(lastChild.getText())) {
+                    defaultObject = stripQuotes(child.getText());
+                }
 
-                LOG.debug("In a stddefault, visiting tuple '{}' '{}'", lastChild.getText(), child.getText());
+//                LOG.debug("In a stddefault, visiting tuple '{}' '{}'", lastChild.getText(), child.getText());
             }
             lastChild = child;
         }
         
-        LOG.debug("Diving into children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
+//        LOG.debug("Visiting children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
+        return visitChildren(ctx);
+    }
+    
+    @Override
+    public T visitCommonsourceoption(OMiPolicyParser.CommonsourceoptionContext ctx) {
+        for (ParseTree child : ctx.children) {
+            if ("UNMATCHEDLOGONLY".equals(child.getText()) ) {
+                defaultUnmatchedLogOnly = true;
+            }
+            LOG.debug("In a commonsourceoptions, visiting token '{}'", child.getText());
+        }
         return visitChildren(ctx);
     }
 
