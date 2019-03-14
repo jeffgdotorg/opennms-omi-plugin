@@ -73,10 +73,10 @@ public class OmiEventConfExtension implements EventConfExtension {
 
     @Override
     public List<EventDefinition> getEventDefinitions() {
-        final List<EventDefinition> suppressMatchDefinitions = Collections.emptyList();
-        final List<EventDefinition> msgMatchDefinitions = Collections.emptyList();
-        final List<EventDefinition> suppressUnmatchDefinitions = Collections.emptyList();
-        final List<EventDefinition> msgUnmatchDefinitions = Collections.emptyList();
+        final List<EventDefinition> suppressMatchDefinitions = new ArrayList<>();
+        final List<EventDefinition> msgMatchDefinitions = new ArrayList<>();
+        final List<EventDefinition> suppressUnmatchDefinitions = new ArrayList<>();
+        final List<EventDefinition> msgUnmatchDefinitions = new ArrayList<>();
         
         for (OmiTrapDef omiTrapDef : omiDefinitionProvider.getTrapDefs()) {
             if (omiTrapDef.getMatchType() == MatchType.SUPP_MATCH) {
@@ -90,7 +90,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
         }
         
-        final List<EventDefinition> orderedEventDefinitions = Collections.emptyList();
+        final List<EventDefinition> orderedEventDefinitions = new ArrayList<>();
         orderedEventDefinitions.addAll(suppressMatchDefinitions);
         orderedEventDefinitions.addAll(msgMatchDefinitions);
         orderedEventDefinitions.addAll(suppressUnmatchDefinitions);
@@ -171,7 +171,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             };
             maskElements.add(specificMask);
         }
-        final List<Varbind> varbinds = Collections.emptyList();
+        final List<Varbind> varbinds = new ArrayList<>();
         if (! omiTrapDef.getVarbindConstraints().isEmpty()) {
             for (VarbindConstraint dtoVb : omiTrapDef.getVarbindConstraints()) {
                 final Varbind vb = new Varbind() {
