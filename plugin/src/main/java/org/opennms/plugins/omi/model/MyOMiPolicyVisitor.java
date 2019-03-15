@@ -79,7 +79,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             if (lastChild != null) {
                 if ("DESCRIPTION".equals(lastChild.getText())) {
                     trapDef.setLabel(nullSafeTrim(child.getText()));
-                    LOG.debug("Visited a suppress-conditions with description '{}'", trapDef.getLabel());
+//                    LOG.debug("Visited a suppress-conditions with description '{}'", trapDef.getLabel());
                 }
             }
             lastChild = child;
@@ -253,7 +253,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             if ("UNMATCHEDLOGONLY".equals(child.getText()) ) {
                 defaultUnmatchedLogOnly = true;
             }
-            LOG.debug("In a commonsourceoptions, visiting token '{}'", child.getText());
+//            LOG.debug("In a commonsourceoptions, visiting token '{}'", child.getText());
         }
         return visitChildren(ctx);
     }
@@ -294,9 +294,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
         if (text == null) {
             return null;
         }
-        LOG.debug("Input text:  |{}|", text);
         text = text.replace("\\\"", "\"");
-        LOG.debug("Output text: |{}|", text);
         return text;
     }
 
