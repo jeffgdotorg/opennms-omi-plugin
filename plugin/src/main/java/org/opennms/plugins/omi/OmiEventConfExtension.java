@@ -90,12 +90,15 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
         }
         
+        LOG.debug("Accumulated event counts by match-type: SUPP_MATCH={} MSG_MATCH={} SUPP_UNMATCH={} MSG_UNMATCH={}", suppressMatchDefinitions.size(), msgMatchDefinitions.size(), suppressUnmatchDefinitions.size(), msgUnmatchDefinitions.size());
+        
         final List<EventDefinition> orderedEventDefinitions = new ArrayList<>();
         orderedEventDefinitions.addAll(suppressMatchDefinitions);
         orderedEventDefinitions.addAll(msgMatchDefinitions);
         orderedEventDefinitions.addAll(suppressUnmatchDefinitions);
         orderedEventDefinitions.addAll(msgUnmatchDefinitions);
         
+        LOG.debug("Returning {} ordered event definitions", orderedEventDefinitions.size());
         return orderedEventDefinitions;
     }
     
