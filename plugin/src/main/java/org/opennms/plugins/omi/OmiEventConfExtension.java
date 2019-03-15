@@ -332,10 +332,6 @@ public class OmiEventConfExtension implements EventConfExtension {
             public List<Parameter> getParameters() {
                 return parameters;
             }
-            
-            public String getOperInstruct() {
-                return omiTrapDef.getHelpText();
-            }
         };
         return def;
     }
