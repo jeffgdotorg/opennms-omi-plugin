@@ -53,7 +53,9 @@ import org.opennms.integration.api.v1.config.events.AlarmType;
 import org.opennms.integration.api.v1.config.events.EventDefinition;
 import org.opennms.integration.api.v1.config.events.LogMessage;
 import org.opennms.integration.api.v1.config.events.LogMsgDestType;
+import org.opennms.integration.api.v1.config.events.Mask;
 import org.opennms.integration.api.v1.config.events.Parameter;
+import org.opennms.integration.api.v1.config.events.Varbind;
 import org.opennms.integration.api.v1.model.Severity;
 
 import com.google.common.io.Resources;
@@ -78,7 +80,7 @@ public class OmiEventConfExtensionTest {
     }
 
     @Test
-    public void canProvideDefinitions() throws IOException {
+    public void canProvideBasicNetappDefinitions() throws IOException {
         final File policyData = temporaryFolder.newFile("netapp_test_policy_data");
         try (InputStream is = Resources.getResource("netapp_test_policy_data").openStream()) {
             Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -101,6 +103,7 @@ public class OmiEventConfExtensionTest {
         // Validate the log message
         LogMessage logMessage = eventDef.getLogMessage();
         assertThat(logMessage, notNullValue());
+        
         assertThat(logMessage.getContent(), equalTo("Link %parm[#1]% up."));
         assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.LOGNDISPLAY));
 
@@ -149,6 +152,88 @@ public class OmiEventConfExtensionTest {
         assertThat(msgGrpParameter.getValue(), equalTo("Storage"));
     }
 
+    @Test
+    public void canProvideModerateTandbergDefinitions() throws IOException {
+        final File policyData = temporaryFolder.newFile("tandberg_test_policy_data");
+        try (InputStream is = Resources.getResource("tandberg_test_policy_data").openStream()) {
+            Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot());
+        OmiEventConfExtension omiEventConfExtension = new OmiEventConfExtension(omiDefProvider);
+
+        final List<EventDefinition> eventDefs = omiEventConfExtension.getEventDefinitions();
+
+        // Make sure we have at least 26
+        assertThat(eventDefs, hasSize(greaterThanOrEqualTo(26)));
+
+        // Look for a specific entry
+        EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "coldStart_Tandberg");
+        assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getLabel(), equalTo("coldStart_Tandberg"));
+        assertThat(eventDef.getSeverity(), equalTo(Severity.MINOR));
+
+        // Validate the log message
+        LogMessage logMessage = eventDef.getLogMessage();
+        assertThat(logMessage, notNullValue());
+        
+        assertThat(logMessage.getContent(), equalTo("Agent Up with Possible Changes (coldStart Trap)"));
+        assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.LOGNDISPLAY));
+
+        // Validate the alarm
+        AlarmData alarmData = eventDef.getAlarmData();
+        assertThat(alarmData, notNullValue());
+        // Don't know how to match problems to clears, so everything is a type 3
+        assertThat(alarmData.getType(), equalTo(AlarmType.PROBLEM_WITHOUT_RESOLUTION));
+        // The reduction key should include all parameters referenced from the label (none, in this case)
+        assertThat(alarmData.getReductionKey(), equalTo("%uei%:%dpname%:%nodeid%"));
+        
+        // Validate that the APPLICATION and MSGGRP tokens got transformed into event parameters
+        List<Parameter> parameters = eventDef.getParameters();
+        assertThat(parameters, hasSize(equalTo(2)));
+        Parameter applicationParameter = findParameter(parameters, "Application");
+        assertThat(applicationParameter.getValue(), equalTo("TandBerg"));
+        Parameter msgGrpParameter = findParameter(parameters, "MsgGrp");
+        assertThat(msgGrpParameter.getValue(), equalTo("Video"));
+        
+        // Look for another specific entry
+        eventDef = findEvent(eventDefs, UEI_PREFIX + "tmsTrapLostOrGotResponse_Lost");
+        assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getLabel(), equalTo("tmsTrapLostOrGotResponse_Lost"));
+        assertThat(eventDef.getSeverity(), equalTo(Severity.MINOR));
+
+        // Validate the mask
+        Mask eventMask = eventDef.getMask();
+        List<Varbind> maskVarbinds = eventMask.getVarbinds();
+        assertThat(maskVarbinds.size(), equalTo(1));
+        assertThat(maskVarbinds.get(0).getNumber(), equalTo(7));
+        assertThat(maskVarbinds.get(0).getValues().size(), equalTo(1));
+        assertThat(maskVarbinds.get(0).getValues().get(0), equalTo("0"));
+        
+        // Validate the log message
+        logMessage = eventDef.getLogMessage();
+        assertThat(logMessage, notNullValue());
+        assertThat(logMessage.getContent(), equalTo("TMS has lost connection with system. System name in TMS: \"%parm[#9]%\". MAC address: \"%parm[#8]%\". Event type value: \"%parm[#4]%\"."));
+        assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.LOGNDISPLAY));
+
+        // Validate the alarm
+        alarmData = eventDef.getAlarmData();
+        assertThat(alarmData, notNullValue());
+        // Don't know how to match problems to clears, so everything is a type 3
+        assertThat(alarmData.getType(), equalTo(AlarmType.PROBLEM_WITHOUT_RESOLUTION));
+        // The reduction key should include all parameters referenced from the label
+        assertThat(alarmData.getReductionKey(), equalTo("%uei%:%dpname%:%nodeid%:%parm[#9]%:%parm[#8]%:%parm[#4]%"));
+
+        // Validate that the APPLICATION and MSGGRP tokens got transformed into event parameters
+        parameters = eventDef.getParameters();
+        assertThat(parameters, hasSize(equalTo(2)));
+        applicationParameter = findParameter(parameters, "Application");
+        assertThat(applicationParameter.getValue(), equalTo("TandBerg"));
+        msgGrpParameter = findParameter(parameters, "MsgGrp");
+        assertThat(msgGrpParameter.getValue(), equalTo("Video"));
+    }
+
+    
     private static EventDefinition findEvent(List<EventDefinition> eventDefs, String uei) {
         return eventDefs.stream().filter(e -> Objects.equals(e.getUei(), uei)).findAny().orElse(null);
     }

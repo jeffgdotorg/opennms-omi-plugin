@@ -141,7 +141,7 @@ public class OmiDefinitionProviderTest {
         OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot());
         final List<OmiTrapDef> trapDefs = omiDefProvider.getTrapDefs();
         
-        // Make sure we have at least 1
+        // Make sure we have at least 26
         assertThat(trapDefs, hasSize(greaterThanOrEqualTo(26)));
         
         // Look for a specific entry
@@ -149,6 +149,7 @@ public class OmiDefinitionProviderTest {
         desiredVBCs.add(new VarbindConstraint(7, "0"));
         OmiTrapDef trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.5596.110.6.1", 6, 7, desiredVBCs);
         assertThat(trapDef, notNullValue());
+        assertThat(trapDef.getText(), equalTo("TMS has lost connection with system. System name in TMS: \"<$9>\". MAC address: \"<$8>\". Event type value: \"<$4>\"."));
         
         desiredVBCs = new ArrayList<>();
         desiredVBCs.add(new VarbindConstraint(7, "1"));

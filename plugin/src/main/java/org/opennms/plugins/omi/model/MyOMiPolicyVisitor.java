@@ -152,7 +152,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             if (lastChild != null) {
                 if ("HELPTEXT".equals(lastChild.getText())) {
                     String helpText = child.getText();
-                    trapDef.setHelpText(stripQuotes(helpText));
+                    trapDef.setHelpText(unescapeQuotes(stripQuotes(helpText)));
                 }
                 if ("SEVERITY".equals(lastChild.getText())) {
                     String severity = child.getText();
@@ -160,7 +160,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                 }
                 if ("TEXT".equals(lastChild.getText())) {
                     String text = child.getText();
-                    trapDef.setText(stripQuotes(text));
+                    trapDef.setText(unescapeQuotes(stripQuotes(text)));
                 }
                 if ("APPLICATION".equals(lastChild.getText())) {
                     String application = child.getText();
@@ -198,7 +198,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                     defaultSourceName = stripQuotes(child.getText());
                 }
                 if ("DESCRIPTION".equals(lastChild.getText())) {
-                    defaultLabel = stripQuotes(child.getText());
+                    defaultLabel = unescapeQuotes(stripQuotes(child.getText()));
                 }
                 if ("SEVERITY".equals(lastChild.getText())) {
                     defaultSeverity = nullSafeTrim(child.getText());
@@ -223,7 +223,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
         for (ParseTree child : ctx.children) {
             if (lastChild != null) {
                 if ("DESCRIPTION".equals(lastChild.getText())) {
-                    defaultLabel = stripQuotes(child.getText());
+                    defaultLabel = unescapeQuotes(stripQuotes(child.getText()));
                 }
                 if ("SEVERITY".equals(lastChild.getText())) {
                     defaultSeverity = nullSafeTrim(child.getText());
@@ -270,13 +270,17 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     }
 
     private static String stripQuotes(String text) {
-        // TODO: This could break if the string contains inner quotes that are escaped -
-        // but we'll worry about that
-        // when it does
         if (text == null) {
             return null;
         }
-        return nullSafeTrim(text.replaceAll("\"", ""));
+        String wip = nullSafeTrim(text);
+        if (wip.startsWith("\"")) {
+            wip = wip.substring(1);
+        }
+        if (wip.endsWith("\"")) {
+            wip = wip.substring(0, wip.length() - 1);
+        }
+        return nullSafeTrim(wip);
     }
 
     private static String nullSafeTrim(String text) {
@@ -284,6 +288,16 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
             return null;
         }
         return text.trim();
+    }
+    
+    private static String unescapeQuotes(String text) {
+        if (text == null) {
+            return null;
+        }
+        LOG.debug("Input text:  |{}|", text);
+        text = text.replace("\\\"", "\"");
+        LOG.debug("Output text: |{}|", text);
+        return text;
     }
 
     @Override
