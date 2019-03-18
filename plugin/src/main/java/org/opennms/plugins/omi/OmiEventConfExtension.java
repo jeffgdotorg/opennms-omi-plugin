@@ -73,6 +73,7 @@ public class OmiEventConfExtension implements EventConfExtension {
 
     @Override
     public List<EventDefinition> getEventDefinitions() {
+        LOG.debug("Top of getEventDefinitions");
         final List<EventDefinition> suppressMatchDefinitions = new ArrayList<>();
         final List<EventDefinition> msgMatchDefinitions = new ArrayList<>();
         final List<EventDefinition> suppressUnmatchDefinitions = new ArrayList<>();
@@ -334,6 +335,10 @@ public class OmiEventConfExtension implements EventConfExtension {
 
             public List<Parameter> getParameters() {
                 return parameters;
+            }
+
+            public String getOperatorInstructions() {
+                return omiTrapDef.getHelpText();
             }
         };
         return def;
