@@ -290,7 +290,7 @@ public class OmiEventConfExtension implements EventConfExtension {
                 }
                 @Override
                 public String getValue() {
-                    return omiTrapDef.getObject();
+                    return replacePlaceholderTokens(omiTrapDef.getObject());
                 }
                 @Override
                 public boolean shouldExpand() {
