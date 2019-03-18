@@ -183,7 +183,17 @@ public class OmiEventConfExtension implements EventConfExtension {
                         return dtoVb.getVbOrdinal();
                     }
                     public List<String> getValues() {
-                        return dtoVb.getValueExpressions();
+                        final StringBuilder vbSb = new StringBuilder();
+                        final List<String> vbValues = new ArrayList<>();
+                        for (String inValue : dtoVb.getValueExpressions()) {
+                            if (isLikelyRegex(inValue)) {
+                                vbSb.append("~").append(inValue);
+                            } else {
+                                vbSb.append(inValue);
+                            }
+                            vbValues.add(vbSb.toString());
+                        }
+                        return vbValues;
                     }
                     public String getTextualConvention() {
                         // TODO should this be null or the empty string?
@@ -379,5 +389,15 @@ public class OmiEventConfExtension implements EventConfExtension {
             tokens.add(String.format("%%parm[#%s]%%", m.group(1)));
         }
         return tokens;
+    }
+    
+    public static boolean isLikelyRegex(String string) {
+        if (string == null) {
+            return false;
+        }
+        if (string.startsWith("^") || string.endsWith("$")) {
+            return true;
+        }
+        return false;
     }
 }
