@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 import org.opennms.integration.api.v1.config.events.AlarmData;
@@ -108,7 +109,11 @@ public class OmiEventConfExtension implements EventConfExtension {
         final LogMessage logMessage = new LogMessage() {
             @Override
             public String getContent() {
-                return replacePlaceholderTokens(omiTrapDef.getText());
+                if (omiTrapDef.getText() == null) {
+                    return replacePlaceholderTokens(omiTrapDef.getLabel());
+                } else {
+                    return replacePlaceholderTokens(omiTrapDef.getText());                    
+                }
             }
             @Override
             public LogMsgDestType getDestination() {
@@ -183,7 +188,21 @@ public class OmiEventConfExtension implements EventConfExtension {
                         return dtoVb.getVbOrdinal();
                     }
                     public List<String> getValues() {
-                        return dtoVb.getValueExpressions();
+                        final StringBuilder vbSb = new StringBuilder();
+                        final List<String> vbValues = new ArrayList<>();
+                        for (String inValue : dtoVb.getValueExpressions()) {
+                            if (isGratuitouslyRegexedInteger(inValue)) {
+                                LOG.debug("Varbind constraint value '{}' is a gratuitously-anchored integer value. Extracting and using sans regex.");
+                                vbSb.append(inValue.substring(1, inValue.length() - 1));
+                            } else if (isLikelyAndValidRegex(inValue)) {
+                                LOG.debug("Varbind constraint value '{}' starts and/or ends with ^ / $, and compiles as a Pattern. Marking as a regex in eventconf.", inValue);
+                                vbSb.append("~").append(inValue);
+                            } else {
+                                vbSb.append(inValue);
+                            }
+                            vbValues.add(vbSb.toString());
+                        }
+                        return vbValues;
                     }
                     public String getTextualConvention() {
                         // TODO should this be null or the empty string?
@@ -379,5 +398,34 @@ public class OmiEventConfExtension implements EventConfExtension {
             tokens.add(String.format("%%parm[#%s]%%", m.group(1)));
         }
         return tokens;
+    }
+    
+    public static boolean isGratuitouslyRegexedInteger(String string) {
+        if (string == null) {
+            return false;
+        }
+        if (string.startsWith("^") && string.endsWith("$")) {
+            String middle = string.substring(1, string.length()-1);
+            if (middle.matches("^\\d+$")) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean isLikelyAndValidRegex(String string) {
+        if (string == null) {
+            return false;
+        }
+        boolean result = false;
+        if (string.startsWith("^") || string.endsWith("$")) {
+            try {
+                Pattern.compile(string);
+                result = true;
+            } catch (PatternSyntaxException pse) {
+                LOG.warn("Varbind constraint value '{}' looks regex-ish but does not compile.");
+            }
+        }
+        return result;
     }
 }

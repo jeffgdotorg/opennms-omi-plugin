@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -231,6 +232,51 @@ public class OmiEventConfExtensionTest {
         assertThat(applicationParameter.getValue(), equalTo("TandBerg"));
         msgGrpParameter = findParameter(parameters, "MsgGrp");
         assertThat(msgGrpParameter.getValue(), equalTo("Video"));
+    }
+    
+    @Test
+    public void canProvideVoluminousAvamarDefinitions() throws IOException {
+        final File policyData = temporaryFolder.newFile("avamar_test_policy_data");
+        try (InputStream is = Resources.getResource("avamar_test_policy_data").openStream()) {
+            Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot());
+        OmiEventConfExtension omiEventConfExtension = new OmiEventConfExtension(omiDefProvider);
+
+        final List<EventDefinition> eventDefs = omiEventConfExtension.getEventDefinitions();
+
+        // Make sure we have the right number
+        assertThat(eventDefs, hasSize(greaterThanOrEqualTo(4606)));
+
+        // Look for a specific entry
+        EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "burmActivityTrap");
+        assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getLabel(), equalTo("burmActivityTrap"));
+        assertThat(eventDef.getSeverity(), equalTo(Severity.INDETERMINATE));
+
+        // Validate the log message
+        LogMessage logMessage = eventDef.getLogMessage();
+        assertThat(logMessage, notNullValue());
+        
+        assertThat(logMessage.getContent(), equalTo("burmActivityTrap"));
+        assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.DONOTPERSIST));
+
+        // Validate the alarm
+        AlarmData alarmData = eventDef.getAlarmData();
+        assertThat(alarmData, notNullValue());
+        // Don't know how to match problems to clears, so everything is a type 3
+        assertThat(alarmData.getType(), equalTo(AlarmType.PROBLEM_WITHOUT_RESOLUTION));
+        // The reduction key should include all parameters referenced from the label (none, in this case)
+        assertThat(alarmData.getReductionKey(), equalTo("%uei%:%dpname%:%nodeid%"));
+        
+        // Validate that the APPLICATION and MSGGRP tokens got transformed into event parameters
+        List<Parameter> parameters = eventDef.getParameters();
+        assertThat(parameters, hasSize(equalTo(2)));
+        Parameter applicationParameter = findParameter(parameters, "Application");
+        assertThat(applicationParameter.getValue(), equalTo("Avamar"));
+        Parameter msgGrpParameter = findParameter(parameters, "MsgGrp");
+        assertThat(msgGrpParameter.getValue(), equalTo("Backup"));
     }
 
     

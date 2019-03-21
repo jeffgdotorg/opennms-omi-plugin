@@ -161,8 +161,26 @@ public class OmiDefinitionProviderTest {
         trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.5596", null, null, desiredVBCs);
         assertThat(trapDef, notNullValue());
         assertThat(trapDef.getObject(), equalTo("<$33>"));
-
      }
+    
+    @Test
+    public void canProvideVoluminousAvamarDefinitions() throws Exception {
+        final File policyData = temporaryFolder.newFile("avamar_test_policy_data");
+        try (InputStream is = Resources.getResource("avamar_test_policy_data").openStream()) {
+            Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+        
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot());
+        final List<OmiTrapDef> trapDefs = omiDefProvider.getTrapDefs();
+        
+        // Make sure we have a bazillion
+        assertThat(trapDefs, hasSize(equalTo(4614)));
+        
+        // Look for a suppressed entry
+        OmiTrapDef trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.15597.1.1.2.1", 6, 1);
+        assertThat(trapDef, notNullValue());
+        LOG.debug("Found what should be a burmActivityTrap: {}", trapDef.toString());
+    }
 
 
     private static OmiTrapDef findTrap(List<OmiTrapDef> trapDefs, String enterpriseId, Integer generic, Integer specific) {
@@ -185,7 +203,7 @@ public class OmiDefinitionProviderTest {
             if (vbConstraints != null) {
                 for (VarbindConstraint vbc : vbConstraints) {
                     if ((def.getVarbindConstraints() == null) || (def.getVarbindConstraints() != null && !def.getVarbindConstraints().contains(vbc))) {
-                        LOG.debug("Eliminated candidate {} because VarbindConstraints lacks {}", def, vbc);
+//                        LOG.debug("Eliminated candidate {} because VarbindConstraints lacks {}", def, vbc);
                         eliminated = true;
                     }
                 }

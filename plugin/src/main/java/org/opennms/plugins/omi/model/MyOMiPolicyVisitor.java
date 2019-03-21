@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.jline.utils.Log;
 import org.opennms.plugins.omi.policy.parser.OMiPolicyBaseVisitor;
@@ -80,6 +81,8 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                 if ("DESCRIPTION".equals(lastChild.getText())) {
                     trapDef.setLabel(nullSafeTrim(child.getText()));
 //                    LOG.debug("Visited a suppress-conditions with description '{}'", trapDef.getLabel());
+                } else {
+//                    LOG.debug("Visited a SUPPRESSCONDITIONS.'{}' with value '{}'", lastChild.getText(), child.getText());
                 }
             }
             lastChild = child;
@@ -108,21 +111,13 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
 
     @Override
     public T visitSnmpconds(OMiPolicyParser.SnmpcondsContext ctx) {
-        // Enterprise IDs are stored are string literals
-        for (OMiPolicyParser.StringLiteralContext stringLiteral : ctx.stringLiteral()) {
-            final String stringValue = stringLiteral.STRING_LITERAL().getText();
-            trapDef.setEnterpriseId(stripQuotes(stringValue));
-            break;
-        }
-
-        // Generics and specifics are stored as integers, we need to walk through the
-        // children
-        // to associate the ints with the previous child which contains the specifier
-        // type (i.e. $G vs $S)
         ParseTree lastChild = null;
         for (ParseTree child : ctx.children) {
             if (lastChild != null) {
-//                LOG.debug("Visiting a snmpmsgconds: '{}' '{}'", lastChild.getText(), child.getText());
+//                LOG.debug("Visiting a snmpconds: '{}' '{}'", lastChild.getText(), child.getText());
+                if ("$e".equals(lastChild.getText())) {
+                    trapDef.setEnterpriseId(stripQuotes(child.getText()));
+                }
                 if ("$G".equals(lastChild.getText())) {
                     trapDef.setGeneric(Integer.parseInt(child.getText()));
                 }
@@ -133,6 +128,9 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                 if (vbMatcher.matches()) {
                     int vbNumber = Integer.valueOf(vbMatcher.group(1));
                     trapDef.addVarbindConstraint(new VarbindConstraint(vbNumber, stripQuotes(child.getText())));
+                }
+                if (ctx.getParent() instanceof OMiPolicyParser.SnmpsuppresscondsContext && child.equals(ctx.getChild(ctx.getChildCount() - 1))) {
+                    pushTrapDef();
                 }
             }
             lastChild = child;
