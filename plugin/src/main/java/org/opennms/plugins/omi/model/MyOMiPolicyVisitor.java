@@ -54,13 +54,21 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     private boolean defaultUnmatchedLogOnly = false;
     private MatchType curMatchType;
     
-    private final Pattern varbindPattern = Pattern.compile("^\\$([0-9]|1[0-5])$");
+    private final Pattern varbindPattern = Pattern.compile("^\\$(\\d{1,2})$");
     
     private static final Logger LOG = LoggerFactory.getLogger(MyOMiPolicyVisitor.class);
 
     @Override
     public T visitCondition_description(OMiPolicyParser.Condition_descriptionContext ctx) {
-        trapDef.setLabel(stripQuotes(ctx.children.get(1).getText()));
+        ParseTree lastChild = null;
+        for (ParseTree child : ctx.children) {
+            if (lastChild != null) {
+                if ("DESCRIPTION".equals(lastChild.getText())) {
+                    trapDef.setLabel(unescapeQuotes(stripQuotes(child.getText())));
+                }
+            }
+            lastChild = child;
+        }
         
 //        LOG.debug("Visiting children of this {}, which is a child of a {}", ctx.getClass().getSimpleName(), ctx.getParent().getClass().getSimpleName());
         return visitChildren(ctx);
@@ -79,10 +87,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
         for (ParseTree child : ctx.children) {
             if (lastChild != null) {
                 if ("DESCRIPTION".equals(lastChild.getText())) {
-                    trapDef.setLabel(nullSafeTrim(child.getText()));
-//                    LOG.debug("Visited a suppress-conditions with description '{}'", trapDef.getLabel());
-                } else {
-//                    LOG.debug("Visited a SUPPRESSCONDITIONS.'{}' with value '{}'", lastChild.getText(), child.getText());
+                    trapDef.setLabel(unescapeQuotes(stripQuotes(child.getText())));
                 }
             }
             lastChild = child;
@@ -99,7 +104,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
         for (ParseTree child : ctx.children) {
             if (lastChild != null) {
                 if ("DESCRIPTION".equals(lastChild.getText())) {
-                    trapDef.setLabel(nullSafeTrim(child.getText()));
+                    trapDef.setLabel(unescapeQuotes(stripQuotes(child.getText())));
                 }
             }
             lastChild = child;
@@ -114,7 +119,6 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
         ParseTree lastChild = null;
         for (ParseTree child : ctx.children) {
             if (lastChild != null) {
-//                LOG.debug("Visiting a snmpconds: '{}' '{}'", lastChild.getText(), child.getText());
                 if ("$e".equals(lastChild.getText())) {
                     trapDef.setEnterpriseId(stripQuotes(child.getText()));
                 }
@@ -129,13 +133,10 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                     int vbNumber = Integer.valueOf(vbMatcher.group(1));
                     trapDef.addVarbindConstraint(new VarbindConstraint(vbNumber, stripQuotes(child.getText())));
                 }
-                if (ctx.getParent() instanceof OMiPolicyParser.SnmpsuppresscondsContext && child.equals(ctx.getChild(ctx.getChildCount() - 1))) {
-                    pushTrapDef();
-                }
             }
             lastChild = child;
         }
-        if (ctx.equals(ctx.getParent().getChild(ctx.getParent().getChildCount() - 1))) {
+        if (ctx.getParent() instanceof OMiPolicyParser.SnmpsuppresscondsContext && lastChild.equals(ctx.getChild(ctx.getChildCount() - 1))) {
             pushTrapDef();
         }
         
@@ -327,11 +328,17 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     }
     
     private void fillDefaultTrapFields(OmiTrapDef trapDef) {
+        if (trapDef.getLabel() == null) {
+            trapDef.setLabel(defaultLabel);
+        }
         if (trapDef.getApplication() == null) {
             trapDef.setApplication(defaultApplication);
         }
         if (trapDef.getMsgGrp() == null) {
             trapDef.setMsgGrp(defaultMsgGrp);
+        }
+        if (trapDef.getObject() == null) {
+            trapDef.setObject(defaultObject);
         }
         if (trapDef.getSeverity() == null) {
             trapDef.setSeverity(defaultSeverity);

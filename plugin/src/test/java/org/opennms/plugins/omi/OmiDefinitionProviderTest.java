@@ -174,7 +174,7 @@ public class OmiDefinitionProviderTest {
         final List<OmiTrapDef> trapDefs = omiDefProvider.getTrapDefs();
         
         // Make sure we have a bazillion
-        assertThat(trapDefs, hasSize(equalTo(4614)));
+        assertThat(trapDefs, hasSize(equalTo(4612)));
         
         // Look for a suppressed entry
         OmiTrapDef trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.15597.1.1.2.1", 6, 1);

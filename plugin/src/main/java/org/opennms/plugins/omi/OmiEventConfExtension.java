@@ -357,6 +357,9 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
 
             public String getOperatorInstructions() {
+                if (omiTrapDef.getHelpText() != null) {
+                    return omiTrapDef.getHelpText().replace("\n", "&0xa;");
+                }
                 return omiTrapDef.getHelpText();
             }
         };
