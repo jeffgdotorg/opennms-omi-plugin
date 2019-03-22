@@ -147,6 +147,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     @Override
     public T visitSet(OMiPolicyParser.SetContext ctx) {
         ParseTree lastChild = null;
+        boolean inMsgKeyRelation = false;
         for (ParseTree child : ctx.children) {
             if (lastChild != null) {
                 if ("HELPTEXT".equals(lastChild.getText())) {
@@ -174,6 +175,16 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                 }
                 if ("SERVERLOGONLY".equals(lastChild.getText())) {
                     trapDef.setServerLogOnly(true);
+                }
+                if ("MSGKEY".equals(lastChild.getText())) {
+                    trapDef.setMsgKey(stripQuotes(child.getText()));
+                }
+                if ("MSGKEYRELATION".equals(lastChild.getText())) {
+                    inMsgKeyRelation = true;
+                }
+                if (inMsgKeyRelation && "ACK".equals(lastChild.getText())) {
+                    trapDef.setMsgKeyRelation(stripQuotes(child.getText()));
+                    inMsgKeyRelation = false;
                 }
             }
             lastChild = child;

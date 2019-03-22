@@ -47,6 +47,8 @@ public class OmiTrapDef {
     private String object;
     private String application;
     private String msgGrp;
+    private String msgKey;
+    private String msgKeyRelation;
     private String helpText;
     private boolean serverLogOnly = false;
 
@@ -156,6 +158,22 @@ public class OmiTrapDef {
 
     public void setMsgGrp(String msgGrp) {
         this.msgGrp = msgGrp;
+    }
+
+    public String getMsgKey() {
+        return msgKey;
+    }
+
+    public void setMsgKey(String msgKey) {
+        this.msgKey = msgKey;
+    }
+
+    public String getMsgKeyRelation() {
+        return msgKeyRelation;
+    }
+
+    public void setMsgKeyRelation(String msgKeyRelation) {
+        this.msgKeyRelation = msgKeyRelation;
     }
 
     public String getHelpText() {

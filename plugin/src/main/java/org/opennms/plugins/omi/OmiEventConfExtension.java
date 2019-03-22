@@ -61,6 +61,8 @@ import org.slf4j.LoggerFactory;
 public class OmiEventConfExtension implements EventConfExtension {
 
     public static final String UEI_PREFIX = "uei.opennms.org/omi/";
+    
+    public static final String AUTO_ACK_USERNAME = "auto-ack";
 
     private static final Logger LOG = LoggerFactory.getLogger(OmiEventConfExtension.class);
 
@@ -231,6 +233,7 @@ public class OmiEventConfExtension implements EventConfExtension {
         };
 
         // Use the placeholder tokens from the text as elements in the reduction key
+        // TODO: Replace with a method
         final StringBuilder reductionKeySb = new StringBuilder();
         reductionKeySb.append("%uei%:%dpname%:%nodeid%");
         for (String placeholderToken : extractPlaceholderTokens(omiTrapDef.getText())) {
@@ -366,6 +369,81 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
         };
         return def;
+    }
+    
+    public static AlarmData toAlarmData(OmiTrapDef trapDef) {
+        final String reductionKey, clearKey;
+        final AlarmType alarmType = AlarmType.PROBLEM_WITHOUT_RESOLUTION;
+        List<UpdateField> updateFields = new ArrayList<>();
+        if (trapDef.getMsgKey() != null) {
+            reductionKey = replacePlaceholderTokens(trapDef.getMsgKey());
+        } else {
+            reductionKey = inferReductionKey(trapDef);
+        }
+        
+        if (trapDef.getMsgKeyRelation() != null) {
+            clearKey = replacePlaceholderTokens(trapDef.getMsgKeyRelation());
+            updateFields.add(new UpdateField() {
+                @Override
+                public String getName() {
+                    return AUTO_ACK_USERNAME;
+                }
+                @Override
+                public boolean isUpdatedOnReduction() {
+                    return true;
+                }
+            });
+            updateFields.add(new UpdateField() {
+                @Override
+                public String getName() {
+                    return "now";
+                }
+                @Override
+                public boolean isUpdatedOnReduction() {
+                    return true;
+                }                
+            });
+        } else {
+            clearKey = null;
+        }
+        
+        return new AlarmData() {
+
+            @Override
+            public String getReductionKey() {
+                return reductionKey;
+            }
+            @Override
+            public AlarmType getType() {
+                return alarmType;
+            }
+            @Override
+            public String getClearKey() {
+                return clearKey;
+            }
+            @Override
+            public boolean isAutoClean() {
+                return false;
+            }
+            @Override
+            public List<UpdateField> getUpdateFields() {
+                return updateFields.isEmpty() ? null : updateFields;
+            }
+            @Override
+            public ManagedObject getManagedObject() {
+                // TODO Auto-generated method stub
+                return null;
+            }};
+    }
+    
+    public static String inferReductionKey(OmiTrapDef trapDef) {
+        final StringBuilder reductionKeySb = new StringBuilder();
+        reductionKeySb.append("%uei%:%dpname%:%nodeid%");
+        for (String placeholderToken : extractPlaceholderTokens(trapDef.getText())) {
+            reductionKeySb.append(":");
+            reductionKeySb.append(placeholderToken);
+        }
+        return reductionKeySb.toString();
     }
 
     public static Severity toOnmsSeverity(String omiSeverity) {
