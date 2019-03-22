@@ -565,6 +565,7 @@ nodelist
 node
         : 'IP' IP_ADR
         | 'IP' IP_ADR stringLiteral
+        | 'OTHER' stringLiteral
         ;
 suppdupl
         : stringLiteral
