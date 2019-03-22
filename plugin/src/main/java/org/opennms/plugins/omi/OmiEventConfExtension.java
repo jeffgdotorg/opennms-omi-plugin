@@ -192,12 +192,13 @@ public class OmiEventConfExtension implements EventConfExtension {
                         final List<String> vbValues = new ArrayList<>();
                         for (String inValue : dtoVb.getValueExpressions()) {
                             if (isGratuitouslyRegexedInteger(inValue)) {
-                                LOG.debug("Varbind constraint value '{}' is a gratuitously-anchored integer value. Extracting and using sans regex.");
                                 vbSb.append(inValue.substring(1, inValue.length() - 1));
+                                LOG.debug("Varbind constraint value '{}' is a gratuitously-anchored integer value. Extracting and using sans regex in eventconf vbvalue: '{}'.", inValue, vbSb.toString());
                             } else if (isLikelyAndValidRegex(inValue)) {
-                                LOG.debug("Varbind constraint value '{}' starts and/or ends with ^ / $, and compiles as a Pattern. Marking as a regex in eventconf.", inValue);
                                 vbSb.append("~").append(inValue);
+                                LOG.debug("Varbind constraint value '{}' starts and/or ends with ^ / $, and compiles as a Pattern. Marking as a regex in eventconf vbvalue: '{}'", inValue, vbSb.toString());
                             } else {
+                                LOG.debug("Varbind constraint value '{}' passed through to vbvalue as a literal.");
                                 vbSb.append(inValue);
                             }
                             vbValues.add(vbSb.toString());
