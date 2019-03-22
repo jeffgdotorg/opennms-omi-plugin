@@ -362,10 +362,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
 
             public String getOperatorInstructions() {
-                if (omiTrapDef.getHelpText() != null) {
-                    return omiTrapDef.getHelpText().replace("\n", "<br/>");
-                }
-                return omiTrapDef.getHelpText();
+                return decorateOperInstruct(omiTrapDef.getHelpText());
             }
         };
         return def;
@@ -409,12 +406,19 @@ public class OmiEventConfExtension implements EventConfExtension {
     }
     
     public static String decorateOperInstruct(String input) {
+        if (input == null || "".equals(input)) {
+            return input;
+        }
         String result = decorateEmailAddresses(input);
         result = decorateHttpLinks(result);
+        result = decorateNewlines(result);
         return result;
     }
     
     public static String decorateEmailAddresses(String input) {
+        if (input == null || "".equals(input)) {
+            return input;
+        }
         String result = input;
         Matcher m = BARE_EMAILADDR_PATTERN.matcher(input);
         if (m.find()) {
@@ -424,12 +428,22 @@ public class OmiEventConfExtension implements EventConfExtension {
     }
     
     public static String decorateHttpLinks(String input) {
+        if (input == null || "".equals(input)) {
+            return input;
+        }
         String result = input;
         Matcher m = BARE_HTTPLINK_PATTERN.matcher(input);
         if (m.find()) {
             result = m.replaceAll("$1<a target=\"_blank\" href=\"$2\">$2</a>$3");
         }
         return result;
+    }
+    
+    public static String decorateNewlines(String input) {
+        if (input == null) {
+            return input;
+        }
+        return input.replace("\n", "<br/>");
     }
     
     public static boolean isGratuitouslyRegexedInteger(String string) {

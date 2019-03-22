@@ -216,30 +216,30 @@ public class OmiEventConfExtensionTest {
                 "GATHER SCRIPTS:\n" + 
                 "\n";
         
-        String expected = "EVENT NAME: eventTrap_21008\n" + 
-                "\n" + 
-                "EVENT TYPE: EMC Avamar Backup SNMP trap\n" + 
-                "\n" + 
-                "DESCRIPTION:\n" + 
-                "Avamar Event CODE : 21008\n" + 
-                "SUMMARY : VERSION MISMATCH.\n" + 
-                "CATEGORY : SYSTEM\n" + 
-                "TYPE : ERROR\n" + 
-                "SEVERITY : 2:PROCESS\n" + 
-                "DESCRIPTION : THE ADMINISTRATOR CLIENT VERSION DOES NOT MATCH THE ADMINISTRATOR SERVER.\n" + 
-                "FOR WHOM : ALL USERS\n" + 
-                "NOTES :\n" + 
-                "\n" + 
-                "RECOMMENDED ACTION: RUN A VERSION OF THE CLIENT THAT MATCHES A VERSION OF THE SERVER.\n" + 
-                "\n" + 
-                "NOTIFICATION: <a href=\"mailto:Alert_Storage@uspto.gov\">Alert_Storage@uspto.gov</a>,<a href=\"mailto:ETBS_Admin@uspto.gov\">ETBS_Admin@uspto.gov</a>\n" + 
-                "\n" + 
-                "COMMENTS:\n" + 
-                "\n" + 
-                "WEB LINKS: <a target=\"_blank\" href=\"http://www.emc.com/support-training/index.htm\">http://www.emc.com/support-training/index.htm</a>\n" + 
-                "\n" + 
-                "GATHER SCRIPTS:\n" + 
-                "\n";
+        String expected = "EVENT NAME: eventTrap_21008<br/>" + 
+                "<br/>" + 
+                "EVENT TYPE: EMC Avamar Backup SNMP trap<br/>" + 
+                "<br/>" + 
+                "DESCRIPTION:<br/>" + 
+                "Avamar Event CODE : 21008<br/>" + 
+                "SUMMARY : VERSION MISMATCH.<br/>" + 
+                "CATEGORY : SYSTEM<br/>" + 
+                "TYPE : ERROR<br/>" + 
+                "SEVERITY : 2:PROCESS<br/>" + 
+                "DESCRIPTION : THE ADMINISTRATOR CLIENT VERSION DOES NOT MATCH THE ADMINISTRATOR SERVER.<br/>" + 
+                "FOR WHOM : ALL USERS<br/>" + 
+                "NOTES :<br/>" + 
+                "<br/>" + 
+                "RECOMMENDED ACTION: RUN A VERSION OF THE CLIENT THAT MATCHES A VERSION OF THE SERVER.<br/>" + 
+                "<br/>" + 
+                "NOTIFICATION: <a href=\"mailto:Alert_Storage@uspto.gov\">Alert_Storage@uspto.gov</a>,<a href=\"mailto:ETBS_Admin@uspto.gov\">ETBS_Admin@uspto.gov</a><br/>" + 
+                "<br/>" + 
+                "COMMENTS:<br/>" + 
+                "<br/>" + 
+                "WEB LINKS: <a target=\"_blank\" href=\"http://www.emc.com/support-training/index.htm\">http://www.emc.com/support-training/index.htm</a><br/>" + 
+                "<br/>" + 
+                "GATHER SCRIPTS:<br/>" + 
+                "<br/>";
         
         assertThat(OmiEventConfExtension.decorateOperInstruct(helpText), equalTo(expected));
     }
