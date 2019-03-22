@@ -198,7 +198,7 @@ public class OmiEventConfExtension implements EventConfExtension {
                                 vbSb.append("~").append(inValue);
                                 LOG.debug("Varbind constraint value '{}' starts and/or ends with ^ / $, and compiles as a Pattern. Marking as a regex in eventconf vbvalue: '{}'", inValue, vbSb.toString());
                             } else {
-                                LOG.debug("Varbind constraint value '{}' passed through to vbvalue as a literal.");
+                                LOG.debug("Varbind constraint value '{}' passed through to vbvalue as a literal.", inValue);
                                 vbSb.append(inValue);
                             }
                             vbValues.add(vbSb.toString());
