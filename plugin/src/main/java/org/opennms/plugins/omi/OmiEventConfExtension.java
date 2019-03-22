@@ -193,12 +193,12 @@ public class OmiEventConfExtension implements EventConfExtension {
                         for (String inValue : dtoVb.getValueExpressions()) {
                             if (isGratuitouslyRegexedInteger(inValue)) {
                                 vbSb.append(inValue.substring(1, inValue.length() - 1));
-                                LOG.debug("Varbind constraint value '{}' is a gratuitously-anchored integer value. Extracting and using sans regex in eventconf vbvalue: '{}'.", inValue, vbSb.toString());
+                                LOG.debug("Varbind #{} constraint value '{}' is a gratuitously-anchored integer value. Extracting and using sans regex in eventconf vbvalue: '{}'.", dtoVb.getVbOrdinal(), inValue, vbSb.toString());
                             } else if (isLikelyAndValidRegex(inValue)) {
                                 vbSb.append("~").append(inValue);
-                                LOG.debug("Varbind constraint value '{}' starts and/or ends with ^ / $, and compiles as a Pattern. Marking as a regex in eventconf vbvalue: '{}'", inValue, vbSb.toString());
+                                LOG.debug("Varbind #{} constraint value '{}' starts and/or ends with ^ / $, and compiles as a Pattern. Marking as a regex in eventconf vbvalue: '{}'", dtoVb.getVbOrdinal(), inValue, vbSb.toString());
                             } else {
-                                LOG.debug("Varbind constraint value '{}' passed through to vbvalue as a literal.", inValue);
+                                LOG.debug("Varbind #{} constraint value '{}' passed through to vbvalue as a literal.", dtoVb.getVbOrdinal(), inValue);
                                 vbSb.append(inValue);
                             }
                             vbValues.add(vbSb.toString());
@@ -427,7 +427,7 @@ public class OmiEventConfExtension implements EventConfExtension {
                 Pattern.compile(string);
                 result = true;
             } catch (PatternSyntaxException pse) {
-                LOG.warn("Varbind constraint value '{}' looks regex-ish but does not compile.");
+                LOG.warn("Varbind constraint value '{}' looks regex-ish but does not compile.", string);
             }
         }
         return result;
