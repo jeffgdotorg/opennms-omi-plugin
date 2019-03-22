@@ -68,7 +68,7 @@ public class OmiEventConfExtension implements EventConfExtension {
     
     private static final Pattern BARE_EMAILADDR_PATTERN = Pattern.compile("([^>:])([^,@ ]+@[^,@ \n]+)\\b");
     
-    private static final Pattern BARE_HTTPLINK_PATTERN = Pattern.compile("([^\">])(https?://.*?)([ \n])");
+    private static final Pattern BARE_HTTPLINK_PATTERN = Pattern.compile("([^\">])(https?://.*?)([ \n]|$)");
 
     private final OmiDefinitionProvider omiDefinitionProvider;
 

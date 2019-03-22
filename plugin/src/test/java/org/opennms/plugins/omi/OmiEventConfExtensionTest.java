@@ -214,7 +214,8 @@ public class OmiEventConfExtensionTest {
                 "WEB LINKS: http://www.emc.com/support-training/index.htm\n" + 
                 "\n" + 
                 "GATHER SCRIPTS:\n" + 
-                "\n";
+                "\n" + 
+                "MORE WEB LINKS: https://www.emc.com/stuff/and/such.blah";
         
         String expected = "EVENT NAME: eventTrap_21008<br/>" + 
                 "<br/>" + 
@@ -239,7 +240,8 @@ public class OmiEventConfExtensionTest {
                 "WEB LINKS: <a target=\"_blank\" href=\"http://www.emc.com/support-training/index.htm\">http://www.emc.com/support-training/index.htm</a><br/>" + 
                 "<br/>" + 
                 "GATHER SCRIPTS:<br/>" + 
-                "<br/>";
+                "<br/>" +
+                "MORE WEB LINKS: <a target=\"_blank\" href=\"https://www.emc.com/stuff/and/such.blah\">https://www.emc.com/stuff/and/such.blah</a>";
         
         assertThat(OmiEventConfExtension.decorateOperInstruct(helpText), equalTo(expected));
     }
