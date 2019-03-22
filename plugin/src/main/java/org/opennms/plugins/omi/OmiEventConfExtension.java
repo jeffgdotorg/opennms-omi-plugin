@@ -65,6 +65,10 @@ public class OmiEventConfExtension implements EventConfExtension {
     private static final Logger LOG = LoggerFactory.getLogger(OmiEventConfExtension.class);
 
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("<\\$(\\d+)>");
+    
+    private static final Pattern BARE_EMAILADDR_PATTERN = Pattern.compile("([^>:])([^,@ ]+@[^,@ \n]+)\\b");
+    
+    private static final Pattern BARE_HTTPLINK_PATTERN = Pattern.compile("([^\">])(https?://.*?)([ \n])");
 
     private final OmiDefinitionProvider omiDefinitionProvider;
 
@@ -402,6 +406,30 @@ public class OmiEventConfExtension implements EventConfExtension {
             tokens.add(String.format("%%parm[#%s]%%", m.group(1)));
         }
         return tokens;
+    }
+    
+    public static String decorateOperInstruct(String input) {
+        String result = decorateEmailAddresses(input);
+        result = decorateHttpLinks(result);
+        return result;
+    }
+    
+    public static String decorateEmailAddresses(String input) {
+        String result = input;
+        Matcher m = BARE_EMAILADDR_PATTERN.matcher(input);
+        if (m.find()) {
+            result = m.replaceAll("$1<a href=\"mailto:$2\">$2</a>");
+        }
+        return result;
+    }
+    
+    public static String decorateHttpLinks(String input) {
+        String result = input;
+        Matcher m = BARE_HTTPLINK_PATTERN.matcher(input);
+        if (m.find()) {
+            result = m.replaceAll("$1<a target=\"_blank\" href=\"$2\">$2</a>$3");
+        }
+        return result;
     }
     
     public static boolean isGratuitouslyRegexedInteger(String string) {

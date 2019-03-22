@@ -79,6 +79,170 @@ public class OmiEventConfExtensionTest {
         assertThat(OmiEventConfExtension.extractPlaceholderTokens("<$2>"), equalTo(Arrays.asList("%parm[#2]%")));
         assertThat(OmiEventConfExtension.extractPlaceholderTokens("<$1>-<$2>"), equalTo(Arrays.asList("%parm[#1]%", "%parm[#2]%")));
     }
+    
+    @Test
+    public void canDecorateEmailAddresses() {
+        String helpText = "EVENT NAME: eventTrap_21008\n" + 
+                "\n" + 
+                "EVENT TYPE: EMC Avamar Backup SNMP trap\n" + 
+                "\n" + 
+                "DESCRIPTION:\n" + 
+                "Avamar Event CODE : 21008\n" + 
+                "SUMMARY : VERSION MISMATCH.\n" + 
+                "CATEGORY : SYSTEM\n" + 
+                "TYPE : ERROR\n" + 
+                "SEVERITY : 2:PROCESS\n" + 
+                "DESCRIPTION : THE ADMINISTRATOR CLIENT VERSION DOES NOT MATCH THE ADMINISTRATOR SERVER.\n" + 
+                "FOR WHOM : ALL USERS\n" + 
+                "NOTES :\n" + 
+                "\n" + 
+                "RECOMMENDED ACTION: RUN A VERSION OF THE CLIENT THAT MATCHES A VERSION OF THE SERVER.\n" + 
+                "\n" + 
+                "NOTIFICATION: Alert_Storage@uspto.gov,ETBS_Admin@uspto.gov\n" + 
+                "\n" + 
+                "COMMENTS:\n" + 
+                "\n" + 
+                "WEB LINKS: http://www.emc.com/support-training/index.htm\n" + 
+                "\n" + 
+                "GATHER SCRIPTS:\n" + 
+                "\n";
+        
+        String expected = "EVENT NAME: eventTrap_21008\n" + 
+                "\n" + 
+                "EVENT TYPE: EMC Avamar Backup SNMP trap\n" + 
+                "\n" + 
+                "DESCRIPTION:\n" + 
+                "Avamar Event CODE : 21008\n" + 
+                "SUMMARY : VERSION MISMATCH.\n" + 
+                "CATEGORY : SYSTEM\n" + 
+                "TYPE : ERROR\n" + 
+                "SEVERITY : 2:PROCESS\n" + 
+                "DESCRIPTION : THE ADMINISTRATOR CLIENT VERSION DOES NOT MATCH THE ADMINISTRATOR SERVER.\n" + 
+                "FOR WHOM : ALL USERS\n" + 
+                "NOTES :\n" + 
+                "\n" + 
+                "RECOMMENDED ACTION: RUN A VERSION OF THE CLIENT THAT MATCHES A VERSION OF THE SERVER.\n" + 
+                "\n" + 
+                "NOTIFICATION: <a href=\"mailto:Alert_Storage@uspto.gov\">Alert_Storage@uspto.gov</a>,<a href=\"mailto:ETBS_Admin@uspto.gov\">ETBS_Admin@uspto.gov</a>\n" + 
+                "\n" + 
+                "COMMENTS:\n" + 
+                "\n" + 
+                "WEB LINKS: http://www.emc.com/support-training/index.htm\n" + 
+                "\n" + 
+                "GATHER SCRIPTS:\n" + 
+                "\n";
+        
+        assertThat(OmiEventConfExtension.decorateEmailAddresses(helpText), equalTo(expected));
+    }
+    
+    @Test
+    public void canDecorateHttpLinks() {
+        String helpText = "EVENT NAME: eventTrap_21008\n" + 
+                "\n" + 
+                "EVENT TYPE: EMC Avamar Backup SNMP trap\n" + 
+                "\n" + 
+                "DESCRIPTION:\n" + 
+                "Avamar Event CODE : 21008\n" + 
+                "SUMMARY : VERSION MISMATCH.\n" + 
+                "CATEGORY : SYSTEM\n" + 
+                "TYPE : ERROR\n" + 
+                "SEVERITY : 2:PROCESS\n" + 
+                "DESCRIPTION : THE ADMINISTRATOR CLIENT VERSION DOES NOT MATCH THE ADMINISTRATOR SERVER.\n" + 
+                "FOR WHOM : ALL USERS\n" + 
+                "NOTES :\n" + 
+                "\n" + 
+                "RECOMMENDED ACTION: RUN A VERSION OF THE CLIENT THAT MATCHES A VERSION OF THE SERVER.\n" + 
+                "\n" + 
+                "NOTIFICATION: Alert_Storage@uspto.gov,ETBS_Admin@uspto.gov\n" + 
+                "\n" + 
+                "COMMENTS:\n" + 
+                "\n" + 
+                "WEB LINKS: http://www.emc.com/support-training/index.htm\n" + 
+                "\n" + 
+                "GATHER SCRIPTS:\n" + 
+                "\n";
+        
+        String expected = "EVENT NAME: eventTrap_21008\n" + 
+                "\n" + 
+                "EVENT TYPE: EMC Avamar Backup SNMP trap\n" + 
+                "\n" + 
+                "DESCRIPTION:\n" + 
+                "Avamar Event CODE : 21008\n" + 
+                "SUMMARY : VERSION MISMATCH.\n" + 
+                "CATEGORY : SYSTEM\n" + 
+                "TYPE : ERROR\n" + 
+                "SEVERITY : 2:PROCESS\n" + 
+                "DESCRIPTION : THE ADMINISTRATOR CLIENT VERSION DOES NOT MATCH THE ADMINISTRATOR SERVER.\n" + 
+                "FOR WHOM : ALL USERS\n" + 
+                "NOTES :\n" + 
+                "\n" + 
+                "RECOMMENDED ACTION: RUN A VERSION OF THE CLIENT THAT MATCHES A VERSION OF THE SERVER.\n" + 
+                "\n" + 
+                "NOTIFICATION: Alert_Storage@uspto.gov,ETBS_Admin@uspto.gov\n" + 
+                "\n" + 
+                "COMMENTS:\n" + 
+                "\n" + 
+                "WEB LINKS: <a target=\"_blank\" href=\"http://www.emc.com/support-training/index.htm\">http://www.emc.com/support-training/index.htm</a>\n" + 
+                "\n" + 
+                "GATHER SCRIPTS:\n" + 
+                "\n";
+        assertThat(OmiEventConfExtension.decorateHttpLinks(helpText), equalTo(expected));
+    }
+    
+    @Test
+    public void canDecorateWholeOperInstruct() {
+        String helpText = "EVENT NAME: eventTrap_21008\n" + 
+                "\n" + 
+                "EVENT TYPE: EMC Avamar Backup SNMP trap\n" + 
+                "\n" + 
+                "DESCRIPTION:\n" + 
+                "Avamar Event CODE : 21008\n" + 
+                "SUMMARY : VERSION MISMATCH.\n" + 
+                "CATEGORY : SYSTEM\n" + 
+                "TYPE : ERROR\n" + 
+                "SEVERITY : 2:PROCESS\n" + 
+                "DESCRIPTION : THE ADMINISTRATOR CLIENT VERSION DOES NOT MATCH THE ADMINISTRATOR SERVER.\n" + 
+                "FOR WHOM : ALL USERS\n" + 
+                "NOTES :\n" + 
+                "\n" + 
+                "RECOMMENDED ACTION: RUN A VERSION OF THE CLIENT THAT MATCHES A VERSION OF THE SERVER.\n" + 
+                "\n" + 
+                "NOTIFICATION: Alert_Storage@uspto.gov,ETBS_Admin@uspto.gov\n" + 
+                "\n" + 
+                "COMMENTS:\n" + 
+                "\n" + 
+                "WEB LINKS: http://www.emc.com/support-training/index.htm\n" + 
+                "\n" + 
+                "GATHER SCRIPTS:\n" + 
+                "\n";
+        
+        String expected = "EVENT NAME: eventTrap_21008\n" + 
+                "\n" + 
+                "EVENT TYPE: EMC Avamar Backup SNMP trap\n" + 
+                "\n" + 
+                "DESCRIPTION:\n" + 
+                "Avamar Event CODE : 21008\n" + 
+                "SUMMARY : VERSION MISMATCH.\n" + 
+                "CATEGORY : SYSTEM\n" + 
+                "TYPE : ERROR\n" + 
+                "SEVERITY : 2:PROCESS\n" + 
+                "DESCRIPTION : THE ADMINISTRATOR CLIENT VERSION DOES NOT MATCH THE ADMINISTRATOR SERVER.\n" + 
+                "FOR WHOM : ALL USERS\n" + 
+                "NOTES :\n" + 
+                "\n" + 
+                "RECOMMENDED ACTION: RUN A VERSION OF THE CLIENT THAT MATCHES A VERSION OF THE SERVER.\n" + 
+                "\n" + 
+                "NOTIFICATION: <a href=\"mailto:Alert_Storage@uspto.gov\">Alert_Storage@uspto.gov</a>,<a href=\"mailto:ETBS_Admin@uspto.gov\">ETBS_Admin@uspto.gov</a>\n" + 
+                "\n" + 
+                "COMMENTS:\n" + 
+                "\n" + 
+                "WEB LINKS: <a target=\"_blank\" href=\"http://www.emc.com/support-training/index.htm\">http://www.emc.com/support-training/index.htm</a>\n" + 
+                "\n" + 
+                "GATHER SCRIPTS:\n" + 
+                "\n";
+        
+        assertThat(OmiEventConfExtension.decorateOperInstruct(helpText), equalTo(expected));
+    }
 
     @Test
     public void canProvideBasicNetappDefinitions() throws IOException {
