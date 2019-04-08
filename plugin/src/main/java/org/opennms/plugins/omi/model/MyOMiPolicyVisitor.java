@@ -53,11 +53,16 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     private String defaultObject;
     private boolean defaultUnmatchedLogOnly = false;
     private MatchType curMatchType;
+    private boolean catchAll = false;
     
     private final Pattern varbindPattern = Pattern.compile("^\\$(\\d{1,2})$");
     
     private static final Logger LOG = LoggerFactory.getLogger(MyOMiPolicyVisitor.class);
 
+    public MyOMiPolicyVisitor(boolean catchAll) {
+        this.catchAll = catchAll;
+    }
+    
     @Override
     public T visitCondition_description(OMiPolicyParser.Condition_descriptionContext ctx) {
         ParseTree lastChild = null;
@@ -269,6 +274,7 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
     }
 
     private void pushTrapDef() {
+        trapDef.setCatchAll(catchAll);
         fillDefaultTrapFields(trapDef);
         trapDefs.add(trapDef);
         LOG.debug("Pushed OmiTrapDef {}", trapDef.toString());

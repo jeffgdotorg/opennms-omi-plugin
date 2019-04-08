@@ -329,7 +329,11 @@ public class OmiEventConfExtension implements EventConfExtension {
 
         final EventDefinition def = new EventDefinition() {
             public int getPriority() {
-                return 1000;
+                int prio = 1000;
+                if (omiTrapDef.isCatchAll()) {
+                    prio--;
+                }
+                return prio;
             }
 
             public String getUei() {

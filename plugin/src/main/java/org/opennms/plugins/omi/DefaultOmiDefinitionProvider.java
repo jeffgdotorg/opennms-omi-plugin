@@ -33,9 +33,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.CharStream;
@@ -54,16 +56,22 @@ public class DefaultOmiDefinitionProvider implements OmiDefinitionProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultOmiDefinitionProvider.class);
 
     private final File omPolicyRoot;
+    private final Set<String> omCatchAllPolicyFiles = new HashSet<>();
     private final List<OmiTrapDef> trapDefs = new LinkedList<>();
 
-    public DefaultOmiDefinitionProvider(String omPolicyRoot) throws IOException {
-        this(new File(Objects.requireNonNull(omPolicyRoot, "path to root is required")));
+    public DefaultOmiDefinitionProvider(String omPolicyRoot, String omCatchAllPolicyFiles) throws IOException {
+        this(new File(Objects.requireNonNull(omPolicyRoot, "path to root is required")), Objects.requireNonNull(omCatchAllPolicyFiles, "catch-all filename is required even if empty"));
     }
 
-    public DefaultOmiDefinitionProvider(File omPolicyRoot) throws IOException {
+    public DefaultOmiDefinitionProvider(File omPolicyRoot, String omCatchAllPolicyFiles) throws IOException {
         Objects.requireNonNull(omPolicyRoot, "root is required");
+        Objects.requireNonNull(omCatchAllPolicyFiles, "catch-all policy files is required even if empty");
         this.omPolicyRoot = omPolicyRoot;
+        for (String catchAllFile : omCatchAllPolicyFiles.split("\\s*,\\s*")) {
+            this.omCatchAllPolicyFiles.add(catchAllFile.trim());
+        }
         LOG.info("DefaultOmiDefinitionProvider initialized.");
+        
         parsePolicyFiles();
     }
 
@@ -75,7 +83,7 @@ public class DefaultOmiDefinitionProvider implements OmiDefinitionProvider {
         for (File policyFile : policyFiles) {
             final OMiPolicyParser parser = parse(policyFile);
             ParseTree parseTree = parser.policy();
-            MyOMiPolicyVisitor<Void> visitor = new MyOMiPolicyVisitor<>();
+            MyOMiPolicyVisitor<Void> visitor = new MyOMiPolicyVisitor<>(omCatchAllPolicyFiles.contains(policyFile.getName()));
             visitor.visit(parseTree);
             trapDefs.addAll(visitor.getTrapDefs());
         }

@@ -15,11 +15,13 @@
     <cm:property-placeholder id="omiPluginProperties" persistent-id="org.opennms.plugins.omi" update-strategy="reload">
         <cm:default-properties>
             <cm:property name="omPolicyRoot" value="/opt/OM_policies" />
+            <cm:property name="omCatchAllPolicyFiles" value="" />
         </cm:default-properties>
     </cm:property-placeholder>
 
     <bean id="omiDefinitionProvider" class="org.opennms.plugins.omi.DefaultOmiDefinitionProvider">
         <argument index="0" value="${omPolicyRoot}"/>
+        <argument index="1" value="${omCatchAllPolicyFiles}"/>
     </bean>
 
     <!-- Expose this as a service so that it can be used in the Karaf shell command -->

@@ -68,7 +68,7 @@ public class OmiDefinitionProviderTest {
             Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot());
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot(), "");
         final List<OmiTrapDef> trapDefs = omiDefProvider.getTrapDefs();
 
         // Make sure we have at least 1
@@ -82,6 +82,7 @@ public class OmiDefinitionProviderTest {
         assertThat(trapDef.getText(), equalTo("Link <$1> up."));
         assertThat(trapDef.getApplication(), equalTo("NetApp"));
         assertThat(trapDef.getMsgGrp(), equalTo("Storage"));
+        assertThat(trapDef.isCatchAll(), equalTo(false));
         assertThat(trapDef.getHelpText(), startsWith("EVENT NAME: NetApp_Link_Up"));
 
         // Look for another specific entry
@@ -92,6 +93,7 @@ public class OmiDefinitionProviderTest {
         assertThat(trapDef.getText(), equalTo("Link <$1> down."));
         assertThat(trapDef.getApplication(), equalTo("NetApp"));
         assertThat(trapDef.getMsgGrp(), equalTo("Storage"));
+        assertThat(trapDef.isCatchAll(), equalTo(false));
         assertThat(trapDef.getHelpText(), startsWith("EVENT NAME: NetApp_Link_Down"));
     }
     
@@ -102,7 +104,7 @@ public class OmiDefinitionProviderTest {
             Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
         
-        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot());
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot(), "");
         final List<OmiTrapDef> trapDefs = omiDefProvider.getTrapDefs();
         
         // Make sure we have at least 1
@@ -113,22 +115,27 @@ public class OmiDefinitionProviderTest {
         desiredVBCs.add(new VarbindConstraint(10, "Link was in high load, but has now retuned to normal operation."));
         OmiTrapDef trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.21658.3.1", 6, 1, desiredVBCs);
         assertThat(trapDef, notNullValue());
+        assertThat(trapDef.isCatchAll(), equalTo(false));
         
         trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.21658.3.1", 6, 1);
         assertThat(trapDef, notNullValue());
+        assertThat(trapDef.isCatchAll(), equalTo(false));
         
         desiredVBCs = new ArrayList<>();
         desiredVBCs.add(new VarbindConstraint(10, "High load occurring during group initialization."));
         trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.21658.3.1", 6, 3, desiredVBCs);
         assertThat(trapDef, notNullValue());
+        assertThat(trapDef.isCatchAll(), equalTo(false));
         
         desiredVBCs = new ArrayList<>();
         desiredVBCs.add(new VarbindConstraint(10, "Link entered high load."));
         trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.21658.3.1", 6, 3, desiredVBCs);
         assertThat(trapDef, notNullValue());
+        assertThat(trapDef.isCatchAll(), equalTo(false));
         
         trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.21658", null, null);
         assertThat(trapDef, notNullValue());
+        assertThat(trapDef.isCatchAll(), equalTo(false));
      }
     
     @Test
@@ -138,7 +145,7 @@ public class OmiDefinitionProviderTest {
             Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
         
-        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot());
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot(), "");
         final List<OmiTrapDef> trapDefs = omiDefProvider.getTrapDefs();
         
         // Make sure we have at least 26
@@ -149,17 +156,20 @@ public class OmiDefinitionProviderTest {
         desiredVBCs.add(new VarbindConstraint(7, "0"));
         OmiTrapDef trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.5596.110.6.1", 6, 7, desiredVBCs);
         assertThat(trapDef, notNullValue());
+        assertThat(trapDef.isCatchAll(), equalTo(false));
         assertThat(trapDef.getText(), equalTo("TMS has lost connection with system. System name in TMS: \"<$9>\". MAC address: \"<$8>\". Event type value: \"<$4>\"."));
         
         desiredVBCs = new ArrayList<>();
         desiredVBCs.add(new VarbindConstraint(7, "1"));
         trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.5596.110.6.1", 6, 7, desiredVBCs);
         assertThat(trapDef, notNullValue());
+        assertThat(trapDef.isCatchAll(), equalTo(false));
         
         desiredVBCs = new ArrayList<>();
         desiredVBCs.add(new VarbindConstraint(14, "tmsTrapRogueSystemFound"));
         trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.5596", null, null, desiredVBCs);
         assertThat(trapDef, notNullValue());
+        assertThat(trapDef.isCatchAll(), equalTo(false));
         assertThat(trapDef.getObject(), equalTo("<$33>"));
      }
     
@@ -170,7 +180,7 @@ public class OmiDefinitionProviderTest {
             Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
         
-        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot());
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot(), "");
         final List<OmiTrapDef> trapDefs = omiDefProvider.getTrapDefs();
         
         // Make sure we have a bazillion
@@ -179,7 +189,32 @@ public class OmiDefinitionProviderTest {
         // Look for a suppressed entry
         OmiTrapDef trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.15597.1.1.2.1", 6, 1);
         assertThat(trapDef, notNullValue());
+        assertThat(trapDef.isCatchAll(), equalTo(false));
         LOG.debug("Found what should be a burmActivityTrap: {}", trapDef.toString());
+    }
+    
+    @Test
+    public void canMarkTrapDefsAsCatchAll() throws IOException {
+        final File policyData = temporaryFolder.newFile("netapp_test_policy_data");
+        try (InputStream is = Resources.getResource("netapp_test_policy_data").openStream()) {
+            Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot(), "xxx, netapp_test_policy_data");
+        final List<OmiTrapDef> trapDefs = omiDefProvider.getTrapDefs();
+
+        // Make sure we have at least 1
+        assertThat(trapDefs, hasSize(greaterThanOrEqualTo(1)));
+
+        // Look for a specific entry
+        OmiTrapDef trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.789", 3, null);
+        assertThat(trapDef, notNullValue());
+        assertThat(trapDef.isCatchAll(), equalTo(true));
+
+        // Look for another specific entry
+        trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.789", 2, null);
+        assertThat(trapDef, notNullValue());
+        assertThat(trapDef.isCatchAll(), equalTo(true));
     }
 
 

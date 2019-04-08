@@ -51,6 +51,7 @@ public class OmiTrapDef {
     private String msgKeyRelation;
     private String helpText;
     private boolean serverLogOnly = false;
+    private boolean catchAll = false;
 
     private String trapTypeOid;
     
@@ -190,6 +191,14 @@ public class OmiTrapDef {
 
     public void setServerLogOnly(boolean serverLogOnly) {
         this.serverLogOnly = serverLogOnly;
+    }
+
+    public boolean isCatchAll() {
+        return catchAll;
+    }
+
+    public void setCatchAll(boolean catchAll) {
+        this.catchAll = catchAll;
     }
 
     public String toString() {

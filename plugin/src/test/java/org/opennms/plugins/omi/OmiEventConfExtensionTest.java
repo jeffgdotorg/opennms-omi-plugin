@@ -253,7 +253,7 @@ public class OmiEventConfExtensionTest {
             Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot());
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot(), "");
         OmiEventConfExtension omiEventConfExtension = new OmiEventConfExtension(omiDefProvider);
 
         final List<EventDefinition> eventDefs = omiEventConfExtension.getEventDefinitions();
@@ -264,6 +264,7 @@ public class OmiEventConfExtensionTest {
         // Look for a specific entry
         EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "NetApp_Link_Up");
         assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getPriority(), equalTo(1000));
         assertThat(eventDef.getLabel(), equalTo("NetApp_Link_Up"));
         assertThat(eventDef.getSeverity(), equalTo(Severity.NORMAL));
 
@@ -293,6 +294,7 @@ public class OmiEventConfExtensionTest {
         // Look for another specific entry
         eventDef = findEvent(eventDefs, UEI_PREFIX + "NetApp_Link_Down");
         assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getPriority(), equalTo(1000));
         assertThat(eventDef.getLabel(), equalTo("NetApp_Link_Down"));
         assertThat(eventDef.getSeverity(), equalTo(Severity.MAJOR));
 
@@ -326,7 +328,7 @@ public class OmiEventConfExtensionTest {
             Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot());
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot(), "");
         OmiEventConfExtension omiEventConfExtension = new OmiEventConfExtension(omiDefProvider);
 
         final List<EventDefinition> eventDefs = omiEventConfExtension.getEventDefinitions();
@@ -337,6 +339,7 @@ public class OmiEventConfExtensionTest {
         // Look for a specific entry
         EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "coldStart_Tandberg");
         assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getPriority(), equalTo(1000));
         assertThat(eventDef.getLabel(), equalTo("coldStart_Tandberg"));
         assertThat(eventDef.getSeverity(), equalTo(Severity.MINOR));
 
@@ -366,6 +369,7 @@ public class OmiEventConfExtensionTest {
         // Look for another specific entry
         eventDef = findEvent(eventDefs, UEI_PREFIX + "tmsTrapLostOrGotResponse_Lost");
         assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getPriority(), equalTo(1000));
         assertThat(eventDef.getLabel(), equalTo("tmsTrapLostOrGotResponse_Lost"));
         assertThat(eventDef.getSeverity(), equalTo(Severity.MINOR));
 
@@ -407,7 +411,7 @@ public class OmiEventConfExtensionTest {
             Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot());
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot(), "");
         OmiEventConfExtension omiEventConfExtension = new OmiEventConfExtension(omiDefProvider);
 
         final List<EventDefinition> eventDefs = omiEventConfExtension.getEventDefinitions();
@@ -418,6 +422,7 @@ public class OmiEventConfExtensionTest {
         // Look for a specific entry
         EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "burmActivityTrap");
         assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getPriority(), equalTo(1000));
         assertThat(eventDef.getLabel(), equalTo("burmActivityTrap"));
         assertThat(eventDef.getSeverity(), equalTo(Severity.INDETERMINATE));
 
@@ -444,7 +449,32 @@ public class OmiEventConfExtensionTest {
         Parameter msgGrpParameter = findParameter(parameters, "MsgGrp");
         assertThat(msgGrpParameter.getValue(), equalTo("Backup"));
     }
+    
+    @Test
+    public void canSetPriorityOnCatchAllEvents() throws IOException {
+        final File policyData = temporaryFolder.newFile("netapp_test_policy_data");
+        try (InputStream is = Resources.getResource("netapp_test_policy_data").openStream()) {
+            Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
 
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot(), "xxx, netapp_test_policy_data");
+        OmiEventConfExtension omiEventConfExtension = new OmiEventConfExtension(omiDefProvider);
+
+        final List<EventDefinition> eventDefs = omiEventConfExtension.getEventDefinitions();
+
+        // Make sure we have at least 1
+        assertThat(eventDefs, hasSize(greaterThanOrEqualTo(1)));
+
+        // Look for a specific entry
+        EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "NetApp_Link_Up");
+        assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getPriority(), equalTo(999));
+        
+        // Look for another specific entry
+        eventDef = findEvent(eventDefs, UEI_PREFIX + "NetApp_Link_Down");
+        assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getPriority(), equalTo(999));
+    }
     
     private static EventDefinition findEvent(List<EventDefinition> eventDefs, String uei) {
         return eventDefs.stream().filter(e -> Objects.equals(e.getUei(), uei)).findAny().orElse(null);
