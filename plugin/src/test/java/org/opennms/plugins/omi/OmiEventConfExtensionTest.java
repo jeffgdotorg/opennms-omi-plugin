@@ -479,31 +479,57 @@ public class OmiEventConfExtensionTest {
     @Test
     public void canReplaceSimpleActionGroups() throws IOException {
         String omiPattern = "^fa-<*>a.<*>example.gov$";
-        assertThat(OmiEventConfExtension.translateAllSimpleActionGroupsToRegex(omiPattern), equalTo("^fa-.*?a..*?example.gov$"));
+        assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern), equalTo("^fa-.*?a..*?example.gov$"));
     }
     
     @Test
     public void canReplaceComplexActionGroups() throws Exception {
+        String omiPattern = "";
+        
         // Start with a gimme
-        String omiPattern = "opener <4*.stuff> closer";
-        assertThat(OmiEventConfExtension.translateAllComplexActionGroupsToRegex(omiPattern), equalTo("opener (?<stuff>.{4}) closer"));
+        omiPattern = "opener <4*.stuff> closer";
+        assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern), equalTo("opener (?<stuff>.{4}) closer"));
 
         // Now try it with multiple action groups
         omiPattern = "Did <4*.stuff> with <8@.thing> and <16#.tertiary> while <32_> yes I did";
-        assertThat(OmiEventConfExtension.translateAllComplexActionGroupsToRegex(omiPattern),
+        assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
                    equalTo("Did (?<stuff>.{4}) with (?<thing>\\w{8}) and (?<tertiary>\\d{16}) while " + OmiEventConfExtension.TOKEN_UNDERSCORE_REGEX_EQUIVALENT + "{32} yes I did"));
+        
+        // This one challenged me late in development
+        omiPattern = "I need a <[foo|bar].thing>, please";
+        assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
+                   equalTo("I need a (?<thing>(?:foo|bar).thing), please"));
+        
         // Now a difficult, real-life example
         omiPattern = "Major:CPU_Busy_Alarm <1*><@.cpu>,<@.workload><1*> due to cpu_busy_alias<*.cpu_busy>,proc_queuelength_alias<*.proc_queue>,<*>workload_cpu_alias<*.workload_cpu>";
-        assertThat(OmiEventConfExtension.translateAllComplexActionGroupsToRegex(omiPattern),
+        assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
                    equalTo("Major:CPU_Busy_Alarm .{1}(?<cpu>\\w+?),(?<workload>\\w+?).{1} due to cpu_busy_alias(?<cpu_busy>.*?),proc_queuelength_alias(?<proc_queue>.*?),.*?workload_cpu_alias(?<workload_cpu>.*?)"));
+    
+        // And another real-life one
+        omiPattern = "^/<*>/[<*.source>%<@>|<*.source>]$";
+        assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
+                   equalTo("^/.*?/(?:(?<source>.*?)%\\w+?|(?<source>.*?))$"));
     }
     
     @Test
     public void canReplaceSquareGroups() throws Exception {
         // Easy one first
-        String omiPattern = "This[foo|bar] is whatever";
-        assertThat(OmiEventConfExtension.translateAllSquareBracketsToParens(omiPattern),
-                   equalTo("This (foo|bar) is whatever"));
+        String omiPattern = "This [foo|bar] is whatever";
+        assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
+                   equalTo("This (?:foo|bar) is whatever"));
+        
+        // Now a nested few
+        omiPattern = "Th[is one|ese[two|three|many]] [is|are] a number";
+        assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
+                   equalTo("Th(?:is one|ese(?:two|three|many)) (?:is|are) a number"));
+    }
+    
+    @Test
+    @Ignore
+    public void canReplaceMixedBags() throws Exception {
+        String omiPattern = "^<[<*>Common/rbac<*>].message>$";
+        assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
+                   equalTo("^(?<message>(?:.*?Common/rbac.*?).message)$"));
     }
     
     private static EventDefinition findEvent(List<EventDefinition> eventDefs, String uei) {

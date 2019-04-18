@@ -72,10 +72,11 @@ public class OmiEventConfExtension implements EventConfExtension {
     protected static final String TOKEN_ASTERISK_REGEX_EQUIVALENT = ".";
     protected static final String TOKEN_AT_REGEX_EQUIVALENT = "\\w";
     protected static final String TOKEN_HASH_REGEX_EQUIVALENT = "\\d";
-    protected static final String TOKEN_UNDERSCORE_REGEX_EQUIVALENT = "[_/\\:-]";
-    protected static final String TOKEN_SLASH_REGEX_EQUIVALENT = "[\\n\\r]";
-    protected static final String TOKEN_S_REGEX_EQUIVALENT = "[ \\t\\n\\r]";
+    protected static final String TOKEN_UNDERSCORE_REGEX_EQUIVALENT = "(_|/|\\|:|-)";
+    protected static final String TOKEN_SLASH_REGEX_EQUIVALENT = "(\\n|\\r)";
+    protected static final String TOKEN_S_REGEX_EQUIVALENT = "( |\\t|\\n|\\r)";
 
+    private static final Pattern ASSIGN_ONLY_ACTION_GROUP_PATTERN = Pattern.compile("(?<!\\{1})<(\\[.+\\])(\\.[A-Za-z][A-Za-z0-9_-]+)>");
     private static final Pattern NEGATED_ACTION_GROUP_PATTERN = Pattern.compile("(?<!\\{1})<!(\\[[^\\]]+\\])>");
     private static final Pattern COMPLEX_ACTION_GROUP_PATTERN = Pattern.compile("(?<!\\{1})<(\\d+)?([*@#_/S])(\\.[A-Za-z][A-Za-z0-9_-]+)?>");
     private static final Pattern INNER_GROUPING_PATTERN = Pattern.compile("(?<!\\{1})\\[([^\\]]+)(?<!\\{1})\\]");
@@ -579,6 +580,15 @@ public class OmiEventConfExtension implements EventConfExtension {
             LOG.debug("NegativeActionGroups Pass {}: {} -> {}",i, lastVal.length(), curVal.length());
         } while (!curVal.equals(lastVal));
         
+        // Separately handle assignment-only action groups such as <[foo|bar].thing>
+        i = 0;
+        do {
+            i++;
+            lastVal = curVal;
+            curVal = translateAllAssignOnlyActionGroupsToRegex(lastVal);
+            LOG.debug("AssignOnlyActionGroups Pass {}: {} -> {}",i, lastVal.length(), curVal.length());
+        } while (!curVal.equals(lastVal));
+        
         // Finally, sub in parens for squares, which do basically the same job
         i = 0;
         do {
@@ -680,11 +690,11 @@ public class OmiEventConfExtension implements EventConfExtension {
                 workingSb.append(")");
             }
             
-            LOG.debug("Appending replacement '{}' for range {}-{}", workingSb.toString(), mat.start(), mat.end());
+            LOG.debug("Appending replacement '{}' for ComplexActionGroup range {}-{}", workingSb.toString(), mat.start(), mat.end());
             mat.appendReplacement(replSb, workingSb.toString());
         }
         mat.appendTail(replSb);
-        return replSb.toString();
+        return "".equals(replSb.toString()) ? output : replSb.toString();
     }
     
     public static String translateAllNegativeActionGroupsToRegex(final String input) {
@@ -693,13 +703,43 @@ public class OmiEventConfExtension implements EventConfExtension {
             return output;
         }
         Matcher mat = NEGATED_ACTION_GROUP_PATTERN.matcher(output);
-        StringBuffer sb = new StringBuffer();
+        StringBuffer replSb = new StringBuffer();
+        StringBuilder workingSb = new StringBuilder();
         while (mat.find()) {
+            LOG.debug("Replacing negative action-groups in range {}-{} ('{}')", mat.start(), mat.end(), input.substring(mat.start(), mat.end()));
+
+            workingSb = new StringBuilder();
             final String negatedSubpattern = mat.group(1);
             // TODO: I might be using negative lookahead wrong here...
-            mat.appendReplacement(sb, "(?!$1)");
+            workingSb.append("(?!").append(negatedSubpattern).append(")");
+
+            LOG.debug("Appending replacement '{}' for NegativeActionGroup range {}-{}", workingSb.toString(), mat.start(), mat.end());
+            mat.appendReplacement(replSb, workingSb.toString());
         }
-        return output;
+        return "".equals(replSb.toString()) ? output : replSb.toString();
+    }
+    
+    public static String translateAllAssignOnlyActionGroupsToRegex(final String input) {
+        String output = input;
+        if (!output.contains("<") && !output.contains(">")) {
+            return output;
+        }
+
+        Matcher mat = ASSIGN_ONLY_ACTION_GROUP_PATTERN.matcher(output);
+        StringBuffer replSb = new StringBuffer();
+        StringBuilder workingSb = new StringBuilder();
+        while (mat.find()) {
+            LOG.debug("Replacing assign-only action-groups in range {}-{} ('{}')", mat.start(), mat.end(), input.substring(mat.start(), mat.end()));
+            
+            workingSb = new StringBuilder();
+            final String groupBody = mat.group(1);
+            final String varName = mat.group(2);
+            workingSb.append("(?<").append(varName).append(">").append(groupBody).append(")");
+
+            LOG.debug("Appending replacement '{}' for AssignOnlyActionGroup range {}-{}", workingSb.toString(), mat.start(), mat.end());
+            mat.appendReplacement(replSb, workingSb.toString());
+        }
+        return "".equals(replSb.toString()) ? output : replSb.toString();
     }
     
     public static String translateAllSquareBracketsToParens(final String input) {
@@ -708,11 +748,11 @@ public class OmiEventConfExtension implements EventConfExtension {
             return output;
         }
         Matcher mat = INNER_GROUPING_PATTERN.matcher(output);
-        StringBuffer sb = new StringBuffer();
+        StringBuffer replSb = new StringBuffer();
         while (mat.find()) {
-            mat.appendReplacement(sb, "(?:$1)");
+            mat.appendReplacement(replSb, "(?:$1)");
         }
-        mat.appendTail(sb);
-        return output;
+        mat.appendTail(replSb);
+        return "".equals(replSb.toString()) ? output : replSb.toString();
     }
 }
