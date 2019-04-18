@@ -498,7 +498,7 @@ public class OmiEventConfExtensionTest {
         // This one challenged me late in development
         omiPattern = "I need a <[foo|bar].thing>, please";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo("I need a (?<thing>(?:foo|bar).thing), please"));
+                   equalTo("I need a (?<thing>(?:foo|bar)), please"));
         
         // Now a difficult, real-life example
         omiPattern = "Major:CPU_Busy_Alarm <1*><@.cpu>,<@.workload><1*> due to cpu_busy_alias<*.cpu_busy>,proc_queuelength_alias<*.proc_queue>,<*>workload_cpu_alias<*.workload_cpu>";

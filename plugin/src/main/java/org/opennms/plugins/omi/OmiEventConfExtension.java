@@ -734,11 +734,13 @@ public class OmiEventConfExtension implements EventConfExtension {
             workingSb = new StringBuilder();
             final String groupBody = mat.group(1);
             final String varName = mat.group(2);
-            workingSb.append("(?<").append(varName).append(">").append(groupBody).append(")");
+            // Note that userVar carries the leading dot, so we do substring(1) to drop it
+            workingSb.append("(?<").append(varName.substring(1)).append(">").append(groupBody).append(")");
 
             LOG.debug("Appending replacement '{}' for AssignOnlyActionGroup range {}-{}", workingSb.toString(), mat.start(), mat.end());
             mat.appendReplacement(replSb, workingSb.toString());
         }
+        mat.appendTail(replSb);
         return "".equals(replSb.toString()) ? output : replSb.toString();
     }
     
