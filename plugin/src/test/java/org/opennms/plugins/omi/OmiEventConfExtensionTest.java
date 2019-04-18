@@ -489,13 +489,21 @@ public class OmiEventConfExtensionTest {
         assertThat(OmiEventConfExtension.translateAllComplexActionGroupsToRegex(omiPattern), equalTo("opener (?<stuff>.{4}) closer"));
 
         // Now try it with multiple action groups
-        omiPattern = "Did <4*.stuff> with <8*.thing> and <16*.tertiary> yes I did";
+        omiPattern = "Did <4*.stuff> with <8@.thing> and <16#.tertiary> while <32_> yes I did";
         assertThat(OmiEventConfExtension.translateAllComplexActionGroupsToRegex(omiPattern),
-                   equalTo("Did (?<stuff>.{4}) with (?<thing>.{8}) and (?<tertiary>.{16}) yes I did"));
+                   equalTo("Did (?<stuff>.{4}) with (?<thing>\\w{8}) and (?<tertiary>\\d{16}) while " + OmiEventConfExtension.TOKEN_UNDERSCORE_REGEX_EQUIVALENT + "{32} yes I did"));
         // Now a difficult, real-life example
-//        omiPattern = "Major:CPU_Busy_Alarm <1*><@.cpu>,<@.workload><1*> due to cpu_busy_alias<*.cpu_busy>,proc_queuelength_alias<*.proc_queue>,<*>workload_cpu_alias<*.workload_cpu>";
-//        assertThat(OmiEventConfExtension.translateAllComplexActionGroupsToRegex(omiPattern),
-//                   equalTo("Major:CPU_Busy_Alarm .{1}(?<cpu>\\w+),(?<workload>\\w+).{1} due to cpu_busy_alias(?<cpu_busy>.*?),proc_queuelength_alias(?<proc_queue>.*?),.*?workload_cpu_alias(?<workload_cpu.*?>)"));
+        omiPattern = "Major:CPU_Busy_Alarm <1*><@.cpu>,<@.workload><1*> due to cpu_busy_alias<*.cpu_busy>,proc_queuelength_alias<*.proc_queue>,<*>workload_cpu_alias<*.workload_cpu>";
+        assertThat(OmiEventConfExtension.translateAllComplexActionGroupsToRegex(omiPattern),
+                   equalTo("Major:CPU_Busy_Alarm .{1}(?<cpu>\\w+?),(?<workload>\\w+?).{1} due to cpu_busy_alias(?<cpu_busy>.*?),proc_queuelength_alias(?<proc_queue>.*?),.*?workload_cpu_alias(?<workload_cpu>.*?)"));
+    }
+    
+    @Test
+    public void canReplaceSquareGroups() throws Exception {
+        // Easy one first
+        String omiPattern = "This[foo|bar] is whatever";
+        assertThat(OmiEventConfExtension.translateAllSquareBracketsToParens(omiPattern),
+                   equalTo("This (foo|bar) is whatever"));
     }
     
     private static EventDefinition findEvent(List<EventDefinition> eventDefs, String uei) {

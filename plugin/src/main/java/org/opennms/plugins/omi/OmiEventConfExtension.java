@@ -69,15 +69,15 @@ public class OmiEventConfExtension implements EventConfExtension {
     
     private static final Pattern BARE_HTTPLINK_PATTERN = Pattern.compile("([^\">])(https?://.*?)([ \n]|$)");
     
-    private static final String TOKEN_ASTERISK_REGEX_EQUIVALENT = ".";
-    private static final String TOKEN_AT_REGEX_EQUIVALENT = "\\w";
-    private static final String TOKEN_HASH_REGEX_EQUIVALENT = "\\d";
-    private static final String TOKEN_UNDERSCORE_REGEX_EQUIVALENT = "[_/\\:-]";
-    private static final String TOKEN_SLASH_REGEX_EQUIVALENT = "[\\n\\r]";
-    private static final String TOKEN_S_REGEX_EQUIVALENT = "[ \\t\\n\\r]";
+    protected static final String TOKEN_ASTERISK_REGEX_EQUIVALENT = ".";
+    protected static final String TOKEN_AT_REGEX_EQUIVALENT = "\\w";
+    protected static final String TOKEN_HASH_REGEX_EQUIVALENT = "\\d";
+    protected static final String TOKEN_UNDERSCORE_REGEX_EQUIVALENT = "[_/\\:-]";
+    protected static final String TOKEN_SLASH_REGEX_EQUIVALENT = "[\\n\\r]";
+    protected static final String TOKEN_S_REGEX_EQUIVALENT = "[ \\t\\n\\r]";
 
     private static final Pattern NEGATED_ACTION_GROUP_PATTERN = Pattern.compile("(?<!\\{1})<!(\\[[^\\]]+\\])>");
-    private static final Pattern COMPLEX_ACTION_GROUP_PATTERN = Pattern.compile("(?<!\\{1})<(\\d+)([*@#_/S])(\\.[A-Za-z][A-Za-z0-9_-]+)>");
+    private static final Pattern COMPLEX_ACTION_GROUP_PATTERN = Pattern.compile("(?<!\\{1})<(\\d+)?([*@#_/S])(\\.[A-Za-z][A-Za-z0-9_-]+)?>");
     private static final Pattern INNER_GROUPING_PATTERN = Pattern.compile("(?<!\\{1})\\[([^\\]]+)(?<!\\{1})\\]");
 
     private final OmiDefinitionProvider omiDefinitionProvider;
@@ -628,7 +628,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             case "*":
                 // This appends the atomic regex equivalent of the glob-token, along with
                 // the appropriate quantifier depending on whether the action group is quantified
-                workingSb.append(TOKEN_ASTERISK_REGEX_EQUIVALENT);
+                workingSb.append(Matcher.quoteReplacement(TOKEN_ASTERISK_REGEX_EQUIVALENT));
                 if (quantifier != null) {
                     // e.g. "{4}" in case of "<4*>"
                     workingSb.append("{").append(quantifier).append("}");
@@ -637,7 +637,7 @@ public class OmiEventConfExtension implements EventConfExtension {
                 }
                 break;
             case "@":
-                workingSb.append(TOKEN_AT_REGEX_EQUIVALENT);
+                workingSb.append(Matcher.quoteReplacement(TOKEN_AT_REGEX_EQUIVALENT));
                 if (quantifier != null) {
                     workingSb.append("{").append(quantifier).append("}");
                 } else {
@@ -645,7 +645,7 @@ public class OmiEventConfExtension implements EventConfExtension {
                 }
                 break;
             case "#":
-                workingSb.append(TOKEN_HASH_REGEX_EQUIVALENT);
+                workingSb.append(Matcher.quoteReplacement(TOKEN_HASH_REGEX_EQUIVALENT));
                 if (quantifier != null) {
                     workingSb.append("{").append(quantifier).append("}");
                 } else {
@@ -653,7 +653,7 @@ public class OmiEventConfExtension implements EventConfExtension {
                 }
                 break;
             case "_":
-                workingSb.append(TOKEN_UNDERSCORE_REGEX_EQUIVALENT);
+                workingSb.append(Matcher.quoteReplacement(TOKEN_UNDERSCORE_REGEX_EQUIVALENT));
                 if (quantifier != null) {
                     workingSb.append("{").append(quantifier).append("}");
                 } else {
@@ -661,14 +661,14 @@ public class OmiEventConfExtension implements EventConfExtension {
                 }
                 break;
             case "/":
-                workingSb.append(TOKEN_SLASH_REGEX_EQUIVALENT);
+                workingSb.append(Matcher.quoteReplacement(TOKEN_SLASH_REGEX_EQUIVALENT));
                 if (quantifier != null) {
                     workingSb.append("{").append(quantifier).append("}");
                 } else {
                     workingSb.append("+");
                 }
             case "S":
-                workingSb.append(TOKEN_S_REGEX_EQUIVALENT);
+                workingSb.append(Matcher.quoteReplacement(TOKEN_S_REGEX_EQUIVALENT));
                 if (quantifier != null) {
                     workingSb.append("{").append(quantifier).append("}");
                 } else {
@@ -712,6 +712,7 @@ public class OmiEventConfExtension implements EventConfExtension {
         while (mat.find()) {
             mat.appendReplacement(sb, "(?:$1)");
         }
+        mat.appendTail(sb);
         return output;
     }
 }
