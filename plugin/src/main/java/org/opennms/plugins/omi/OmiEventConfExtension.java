@@ -557,7 +557,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             i++;
             lastVal = curVal;
             curVal = translateAllSimpleActionGroupsToRegex(lastVal);
-            LOG.debug("SimpleActionGroups Pass {}: '{}' -> '{}'",i, lastVal, curVal);
+            LOG.debug("SimpleActionGroups Pass {}: {} -> {}",i, lastVal.length(), curVal.length());
         } while (!curVal.equals(lastVal));
         
         // Next, replace complex action groups such as <4#.somevar>
@@ -566,7 +566,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             i++;
             lastVal = curVal;
             curVal = translateAllComplexActionGroupsToRegex(lastVal);
-            LOG.debug("ComplexActionGroups Pass {}: '{}' -> '{}'",i, lastVal, curVal);
+            LOG.debug("ComplexActionGroups Pass {}: {} -> {}",i, lastVal.length(), curVal.length());
         } while (!curVal.equals(lastVal));
         
         // Now replace negated action patterns such as <![Warning]>
@@ -576,7 +576,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             i++;
             lastVal = curVal;
             curVal = translateAllNegativeActionGroupsToRegex(lastVal);
-            LOG.debug("NegativeActionGroups Pass {}: '{}' -> '{}'",i, lastVal, curVal);
+            LOG.debug("NegativeActionGroups Pass {}: {} -> {}",i, lastVal.length(), curVal.length());
         } while (!curVal.equals(lastVal));
         
         // Finally, sub in parens for squares, which do basically the same job
@@ -585,7 +585,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             i++;
             lastVal = curVal;
             curVal = translateAllSquareBracketsToParens(lastVal);
-            LOG.debug("SquareBrackets Pass {}: '{}' -> '{}'",i, lastVal, curVal);
+            LOG.debug("SquareBrackets Pass {}: {} -> {}",i, lastVal.length(), curVal.length());
         } while (!curVal.equals(lastVal));
         
         return curVal;
