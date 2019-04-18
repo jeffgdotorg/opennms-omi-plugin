@@ -29,15 +29,12 @@
 package org.opennms.plugins.omi;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-import java.util.stream.Collectors;
 
 import org.opennms.integration.api.v1.config.events.AlarmData;
 import org.opennms.integration.api.v1.config.events.AlarmType;
@@ -71,6 +68,17 @@ public class OmiEventConfExtension implements EventConfExtension {
     private static final Pattern BARE_EMAILADDR_PATTERN = Pattern.compile("([^>:])([^,@ ]+@[^,@ \n]+)\\b");
     
     private static final Pattern BARE_HTTPLINK_PATTERN = Pattern.compile("([^\">])(https?://.*?)([ \n]|$)");
+    
+    private static final String TOKEN_ASTERISK_REGEX_EQUIVALENT = ".";
+    private static final String TOKEN_AT_REGEX_EQUIVALENT = "\\w";
+    private static final String TOKEN_HASH_REGEX_EQUIVALENT = "\\d";
+    private static final String TOKEN_UNDERSCORE_REGEX_EQUIVALENT = "[_/\\:-]";
+    private static final String TOKEN_SLASH_REGEX_EQUIVALENT = "[\\n\\r]";
+    private static final String TOKEN_S_REGEX_EQUIVALENT = "[ \\t\\n\\r]";
+
+    private static final Pattern NEGATED_ACTION_GROUP_PATTERN = Pattern.compile("(?<!\\{1})<!(\\[[^\\]]+\\])>");
+    private static final Pattern COMPLEX_ACTION_GROUP_PATTERN = Pattern.compile("(?<!\\{1})<(\\d+)([*@#_/S])(\\.[A-Za-z][A-Za-z0-9_-]+)>");
+    private static final Pattern INNER_GROUPING_PATTERN = Pattern.compile("(?<!\\{1})\\[([^\\]]+)(?<!\\{1})\\]");
 
     private final OmiDefinitionProvider omiDefinitionProvider;
 
@@ -194,20 +202,17 @@ public class OmiEventConfExtension implements EventConfExtension {
                         return dtoVb.getVbOrdinal();
                     }
                     public List<String> getValues() {
-                        final StringBuilder vbSb = new StringBuilder();
+                        String vbString;
                         final List<String> vbValues = new ArrayList<>();
                         for (String inValue : dtoVb.getValueExpressions()) {
                             if (isGratuitouslyRegexedInteger(inValue)) {
-                                vbSb.append(inValue.substring(1, inValue.length() - 1));
-                                LOG.debug("Varbind #{} constraint value '{}' is a gratuitously-anchored integer value. Extracting and using sans regex in eventconf vbvalue: '{}'.", dtoVb.getVbOrdinal(), inValue, vbSb.toString());
-                            } else if (isLikelyAndValidRegex(inValue)) {
-                                vbSb.append("~").append(inValue);
-                                LOG.debug("Varbind #{} constraint value '{}' starts and/or ends with ^ / $, and compiles as a Pattern. Marking as a regex in eventconf vbvalue: '{}'", dtoVb.getVbOrdinal(), inValue, vbSb.toString());
+                                vbString = inValue.substring(1, inValue.length() - 1);
+                                LOG.debug("Varbind #{} constraint value '{}' is a gratuitously-anchored integer value. Extracting and using sans regex in eventconf vbvalue: '{}'.", dtoVb.getVbOrdinal(), inValue, vbString);
                             } else {
-                                LOG.debug("Varbind #{} constraint value '{}' passed through to vbvalue as a literal.", dtoVb.getVbOrdinal(), inValue);
-                                vbSb.append(inValue);
+                                vbString = translateOmiPatternToRegex(inValue);
+                                LOG.debug("Translated OMi pattern '{}' to regex '{}'", inValue, vbString);
                             }
-                            vbValues.add(vbSb.toString());
+                            vbValues.add(vbString);
                         }
                         return vbValues;
                     }
@@ -541,19 +546,147 @@ public class OmiEventConfExtension implements EventConfExtension {
         return false;
     }
     
-    public static boolean isLikelyAndValidRegex(String string) {
-        if (string == null) {
-            return false;
+    public static String translateOmiPatternToRegex(final String input) {
+        String curVal = input, lastVal = input;
+        // Attempt to replace pattern structures from the inside out
+
+        // Start with non-quantified, non-uservar tokens such as <*>
+        // Repeat until we reach stasis
+        do {
+            lastVal = curVal;
+            curVal = translateAllSimpleActionGroupsToRegex(lastVal);
+        } while (!curVal.equals(lastVal));
+        
+        // Next, replace complex action groups such as <4#.somevar>
+        do {
+            lastVal = curVal;
+            curVal = translateAllComplexActionGroupsToRegex(lastVal);
+        } while (!curVal.equals(lastVal));
+        
+        // Now replace negated action patterns such as <![Warning]>
+        // TODO: This one needs refinement
+        do {
+            lastVal = curVal;
+            curVal = translateAllNegativeActionGroupsToRegex(lastVal);
+        } while (!curVal.equals(lastVal));
+        
+        // Finally, sub in parens for squares, which do basically the same job
+        do {
+            lastVal = curVal;
+            curVal = translateAllSquareBracketsToParens(lastVal);
+        } while (!curVal.equals(lastVal));
+        
+        return curVal;
+    }
+    
+    public static String translateAllSimpleActionGroupsToRegex(final String input) {
+        String output = input;
+        output.replaceAll("(?<!\\{1})<\\*>", Matcher.quoteReplacement(TOKEN_ASTERISK_REGEX_EQUIVALENT+"*?"));        // <*> matches any string of zero or more arbitrary characters (including separators)
+        output.replaceAll("(?<!\\{1})<@>", Matcher.quoteReplacement(TOKEN_AT_REGEX_EQUIVALENT+"+?"));                // <@> matches any string that contains no separator characters, in other words, a sequence of one or more non-separators; this can be used for matching words
+        output.replaceAll("(?<!\\{1})<#>", Matcher.quoteReplacement(TOKEN_HASH_REGEX_EQUIVALENT+"+?"));              // <#> matches a sequence of one or more digits
+        output.replaceAll("(?<!\\{1})<_>", Matcher.quoteReplacement(TOKEN_UNDERSCORE_REGEX_EQUIVALENT+"+?"));        // <_> matches a sequence of one or more field separators
+        output.replaceAll("(?<!\\{1})</>", Matcher.quoteReplacement(TOKEN_SLASH_REGEX_EQUIVALENT+"+?"));             // </> matches one or more line breaks
+        output.replaceAll("(?<!\\{1})<S>", Matcher.quoteReplacement(TOKEN_S_REGEX_EQUIVALENT));                      // <S> matches one or more white space characters: space, tab and new line characters (" ", \t, \n, \r)
+        return output;
+    }
+    
+    public static String translateAllComplexActionGroupsToRegex(final String input) {
+        String output = input;
+        // If no <> remain, don't bother with replacing this stuff
+        if (!output.contains("<") && !output.contains(">")) {
+            return output;
         }
-        boolean result = false;
-        if (string.startsWith("^") || string.endsWith("$")) {
-            try {
-                Pattern.compile(string);
-                result = true;
-            } catch (PatternSyntaxException pse) {
-                LOG.warn("Varbind constraint value '{}' looks regex-ish but does not compile.", string);
+        Matcher mat = COMPLEX_ACTION_GROUP_PATTERN.matcher(output);
+        StringBuffer sb = new StringBuffer();
+        while (mat.find()) {
+            final String quantifier = mat.group(1);
+            final String globToken = mat.group(2);
+            final String userVar = mat.group(3);
+            
+            if (userVar != null) {
+                mat.appendReplacement(sb, "(?<$3>");
+            }
+            switch(globToken) {
+            case "*":
+                mat.appendReplacement(sb, TOKEN_ASTERISK_REGEX_EQUIVALENT);
+                if (quantifier != null) {
+                    mat.appendReplacement(sb, "{$1}");
+                } else {
+                    mat.appendReplacement(sb, "*?");
+                }
+                break;
+            case "@":
+                mat.appendReplacement(sb, TOKEN_AT_REGEX_EQUIVALENT);
+                if (quantifier != null) {
+                    mat.appendReplacement(sb, "{$1}");
+                } else {
+                    mat.appendReplacement(sb, "+?");
+                }
+                break;
+            case "#":
+                mat.appendReplacement(sb, TOKEN_HASH_REGEX_EQUIVALENT);
+                if (quantifier != null) {
+                    mat.appendReplacement(sb, "{$1}");
+                } else {
+                    mat.appendReplacement(sb, "+?");
+                }
+                break;
+            case "_":
+                mat.appendReplacement(sb, TOKEN_UNDERSCORE_REGEX_EQUIVALENT);
+                if (quantifier != null) {
+                    mat.appendReplacement(sb, "{$1}");
+                } else {
+                    mat.appendReplacement(sb, "+?");
+                }
+                break;
+            case "/":
+                mat.appendReplacement(sb, TOKEN_SLASH_REGEX_EQUIVALENT);
+                if (quantifier != null) {
+                    mat.appendReplacement(sb, "{$1}");
+                } else {
+                    mat.appendReplacement(sb, "+");
+                }
+            case "S":
+                mat.appendReplacement(sb, TOKEN_S_REGEX_EQUIVALENT);
+                if (quantifier != null) {
+                    mat.appendReplacement(sb, "{$1}");
+                }
+            }
+            if (userVar != null) {
+                mat.appendReplacement(sb, ")");
+            } else {
+                mat.appendReplacement(sb, "+");
             }
         }
-        return result;
+        mat.appendTail(sb);
+        return sb.toString();
+    }
+    
+    public static String translateAllNegativeActionGroupsToRegex(final String input) {
+        String output = input;
+        if (!output.contains("<") && !output.contains(">")) {
+            return output;
+        }
+        Matcher mat = NEGATED_ACTION_GROUP_PATTERN.matcher(output);
+        StringBuffer sb = new StringBuffer();
+        while (mat.find()) {
+            final String negatedSubpattern = mat.group(1);
+            // TODO: I might be using negative lookahead wrong here...
+            mat.appendReplacement(sb, "(?!$1)");
+        }
+        return output;
+    }
+    
+    public static String translateAllSquareBracketsToParens(final String input) {
+        String output = input;
+        if (!output.contains("[") && !output.contains("]")) {
+            return output;
+        }
+        Matcher mat = INNER_GROUPING_PATTERN.matcher(output);
+        StringBuffer sb = new StringBuffer();
+        while (mat.find()) {
+            mat.appendReplacement(sb, "(?:$1)");
+        }
+        return output;
     }
 }
