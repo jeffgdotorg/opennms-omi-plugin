@@ -476,6 +476,28 @@ public class OmiEventConfExtensionTest {
         assertThat(eventDef.getPriority(), equalTo(999));
     }
     
+    @Test
+    public void canReplaceSimpleActionGroups() throws IOException {
+        String omiPattern = "^fa-<*>a.<*>example.gov$";
+        assertThat(OmiEventConfExtension.translateAllSimpleActionGroupsToRegex(omiPattern), equalTo("^fa-.*?a..*?example.gov$"));
+    }
+    
+    @Test
+    public void canReplaceComplexActionGroups() throws Exception {
+        // Start with a gimme
+        String omiPattern = "opener <4*.stuff> closer";
+        assertThat(OmiEventConfExtension.translateAllComplexActionGroupsToRegex(omiPattern), equalTo("opener (?<stuff>.{4}) closer"));
+
+        // Now try it with multiple action groups
+        omiPattern = "Did <4*.stuff> with <8*.thing> and <16*.tertiary> yes I did";
+        assertThat(OmiEventConfExtension.translateAllComplexActionGroupsToRegex(omiPattern),
+                   equalTo("Did (?<stuff>.{4}) with (?<thing>.{8}) and (?<tertiary>.{16}) yes I did"));
+        // Now a difficult, real-life example
+//        omiPattern = "Major:CPU_Busy_Alarm <1*><@.cpu>,<@.workload><1*> due to cpu_busy_alias<*.cpu_busy>,proc_queuelength_alias<*.proc_queue>,<*>workload_cpu_alias<*.workload_cpu>";
+//        assertThat(OmiEventConfExtension.translateAllComplexActionGroupsToRegex(omiPattern),
+//                   equalTo("Major:CPU_Busy_Alarm .{1}(?<cpu>\\w+),(?<workload>\\w+).{1} due to cpu_busy_alias(?<cpu_busy>.*?),proc_queuelength_alias(?<proc_queue>.*?),.*?workload_cpu_alias(?<workload_cpu.*?>)"));
+    }
+    
     private static EventDefinition findEvent(List<EventDefinition> eventDefs, String uei) {
         return eventDefs.stream().filter(e -> Objects.equals(e.getUei(), uei)).findAny().orElse(null);
     }

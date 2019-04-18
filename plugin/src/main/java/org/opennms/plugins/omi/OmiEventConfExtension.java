@@ -592,13 +592,13 @@ public class OmiEventConfExtension implements EventConfExtension {
     }
     
     public static String translateAllSimpleActionGroupsToRegex(final String input) {
-        String output = input;
-        output.replaceAll("(?<!\\{1})<\\*>", Matcher.quoteReplacement(TOKEN_ASTERISK_REGEX_EQUIVALENT+"*?"));        // <*> matches any string of zero or more arbitrary characters (including separators)
-        output.replaceAll("(?<!\\{1})<@>", Matcher.quoteReplacement(TOKEN_AT_REGEX_EQUIVALENT+"+?"));                // <@> matches any string that contains no separator characters, in other words, a sequence of one or more non-separators; this can be used for matching words
-        output.replaceAll("(?<!\\{1})<#>", Matcher.quoteReplacement(TOKEN_HASH_REGEX_EQUIVALENT+"+?"));              // <#> matches a sequence of one or more digits
-        output.replaceAll("(?<!\\{1})<_>", Matcher.quoteReplacement(TOKEN_UNDERSCORE_REGEX_EQUIVALENT+"+?"));        // <_> matches a sequence of one or more field separators
-        output.replaceAll("(?<!\\{1})</>", Matcher.quoteReplacement(TOKEN_SLASH_REGEX_EQUIVALENT+"+?"));             // </> matches one or more line breaks
-        output.replaceAll("(?<!\\{1})<S>", Matcher.quoteReplacement(TOKEN_S_REGEX_EQUIVALENT));                      // <S> matches one or more white space characters: space, tab and new line characters (" ", \t, \n, \r)
+        String output = input
+        .replaceAll("(?<!\\{1})<\\*>", Matcher.quoteReplacement(TOKEN_ASTERISK_REGEX_EQUIVALENT+"*?"))        // <*> matches any string of zero or more arbitrary characters (including separators)
+        .replaceAll("(?<!\\{1})<@>", Matcher.quoteReplacement(TOKEN_AT_REGEX_EQUIVALENT+"+?"))                // <@> matches any string that contains no separator characters, in other words, a sequence of one or more non-separators; this can be used for matching words
+        .replaceAll("(?<!\\{1})<#>", Matcher.quoteReplacement(TOKEN_HASH_REGEX_EQUIVALENT+"+?"))              // <#> matches a sequence of one or more digits
+        .replaceAll("(?<!\\{1})<_>", Matcher.quoteReplacement(TOKEN_UNDERSCORE_REGEX_EQUIVALENT+"+?"))        // <_> matches a sequence of one or more field separators
+        .replaceAll("(?<!\\{1})</>", Matcher.quoteReplacement(TOKEN_SLASH_REGEX_EQUIVALENT+"+?"))             // </> matches one or more line breaks
+        .replaceAll("(?<!\\{1})<S>", Matcher.quoteReplacement(TOKEN_S_REGEX_EQUIVALENT));                     // <S> matches one or more white space characters: space, tab and new line characters (" ", \t, \n, \r)
         return output;
     }
     
@@ -609,69 +609,82 @@ public class OmiEventConfExtension implements EventConfExtension {
             return output;
         }
         Matcher mat = COMPLEX_ACTION_GROUP_PATTERN.matcher(output);
-        StringBuffer sb = new StringBuffer();
+        StringBuffer replSb = new StringBuffer();
+        StringBuilder workingSb = new StringBuilder();
         while (mat.find()) {
+            LOG.debug("Replacing complex action-groups in range {}-{} ('{}')", mat.start(), mat.end(), input.substring(mat.start(), mat.end()));
+            workingSb = new StringBuilder();
             final String quantifier = mat.group(1);
             final String globToken = mat.group(2);
             final String userVar = mat.group(3);
             
             if (userVar != null) {
-                mat.appendReplacement(sb, "(?<$3>");
+                // This opens a named-capturing group, which we will close down below
+                // e.g. "(?<stuff>" in case of "<*.stuff>"
+                // Note that userVar carries the leading dot, so we do substring(1) to drop it
+                workingSb.append("(?<").append(userVar.substring(1)).append(">");
             }
             switch(globToken) {
             case "*":
-                mat.appendReplacement(sb, TOKEN_ASTERISK_REGEX_EQUIVALENT);
+                // This appends the atomic regex equivalent of the glob-token, along with
+                // the appropriate quantifier depending on whether the action group is quantified
+                workingSb.append(TOKEN_ASTERISK_REGEX_EQUIVALENT);
                 if (quantifier != null) {
-                    mat.appendReplacement(sb, "{$1}");
+                    // e.g. "{4}" in case of "<4*>"
+                    workingSb.append("{").append(quantifier).append("}");
                 } else {
-                    mat.appendReplacement(sb, "*?");
+                    workingSb.append("*?");
                 }
                 break;
             case "@":
-                mat.appendReplacement(sb, TOKEN_AT_REGEX_EQUIVALENT);
+                workingSb.append(TOKEN_AT_REGEX_EQUIVALENT);
                 if (quantifier != null) {
-                    mat.appendReplacement(sb, "{$1}");
+                    workingSb.append("{").append(quantifier).append("}");
                 } else {
-                    mat.appendReplacement(sb, "+?");
+                    workingSb.append("+?");
                 }
                 break;
             case "#":
-                mat.appendReplacement(sb, TOKEN_HASH_REGEX_EQUIVALENT);
+                workingSb.append(TOKEN_HASH_REGEX_EQUIVALENT);
                 if (quantifier != null) {
-                    mat.appendReplacement(sb, "{$1}");
+                    workingSb.append("{").append(quantifier).append("}");
                 } else {
-                    mat.appendReplacement(sb, "+?");
+                    workingSb.append("+?");
                 }
                 break;
             case "_":
-                mat.appendReplacement(sb, TOKEN_UNDERSCORE_REGEX_EQUIVALENT);
+                workingSb.append(TOKEN_UNDERSCORE_REGEX_EQUIVALENT);
                 if (quantifier != null) {
-                    mat.appendReplacement(sb, "{$1}");
+                    workingSb.append("{").append(quantifier).append("}");
                 } else {
-                    mat.appendReplacement(sb, "+?");
+                    workingSb.append("+?");
                 }
                 break;
             case "/":
-                mat.appendReplacement(sb, TOKEN_SLASH_REGEX_EQUIVALENT);
+                workingSb.append(TOKEN_SLASH_REGEX_EQUIVALENT);
                 if (quantifier != null) {
-                    mat.appendReplacement(sb, "{$1}");
+                    workingSb.append("{").append(quantifier).append("}");
                 } else {
-                    mat.appendReplacement(sb, "+");
+                    workingSb.append("+");
                 }
             case "S":
-                mat.appendReplacement(sb, TOKEN_S_REGEX_EQUIVALENT);
+                workingSb.append(TOKEN_S_REGEX_EQUIVALENT);
                 if (quantifier != null) {
-                    mat.appendReplacement(sb, "{$1}");
+                    workingSb.append("{").append(quantifier).append("}");
+                } else {
+                    workingSb.append("+");
                 }
             }
             if (userVar != null) {
-                mat.appendReplacement(sb, ")");
-            } else {
-                mat.appendReplacement(sb, "+");
+                // Here is where we close the named-capturing group
+                workingSb.append(")");
             }
+            
+            LOG.debug("Appending replacement '{}' for range {}-{}", workingSb.toString(), mat.start(), mat.end());
+            mat.appendReplacement(replSb, workingSb.toString());
         }
-        mat.appendTail(sb);
-        return sb.toString();
+        mat.appendTail(replSb);
+        return replSb.toString();
     }
     
     public static String translateAllNegativeActionGroupsToRegex(final String input) {
