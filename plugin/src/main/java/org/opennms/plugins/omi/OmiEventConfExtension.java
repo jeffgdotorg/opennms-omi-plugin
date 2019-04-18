@@ -552,28 +552,40 @@ public class OmiEventConfExtension implements EventConfExtension {
 
         // Start with non-quantified, non-uservar tokens such as <*>
         // Repeat until we reach stasis
+        int i = 0;
         do {
+            i++;
             lastVal = curVal;
             curVal = translateAllSimpleActionGroupsToRegex(lastVal);
+            LOG.debug("SimpleActionGroups Pass {}: '{}' -> '{}'",i, lastVal, curVal);
         } while (!curVal.equals(lastVal));
         
         // Next, replace complex action groups such as <4#.somevar>
+        i = 0;
         do {
+            i++;
             lastVal = curVal;
             curVal = translateAllComplexActionGroupsToRegex(lastVal);
+            LOG.debug("ComplexActionGroups Pass {}: '{}' -> '{}'",i, lastVal, curVal);
         } while (!curVal.equals(lastVal));
         
         // Now replace negated action patterns such as <![Warning]>
         // TODO: This one needs refinement
+        i = 0;
         do {
+            i++;
             lastVal = curVal;
             curVal = translateAllNegativeActionGroupsToRegex(lastVal);
+            LOG.debug("NegativeActionGroups Pass {}: '{}' -> '{}'",i, lastVal, curVal);
         } while (!curVal.equals(lastVal));
         
         // Finally, sub in parens for squares, which do basically the same job
+        i = 0;
         do {
+            i++;
             lastVal = curVal;
             curVal = translateAllSquareBracketsToParens(lastVal);
+            LOG.debug("SquareBrackets Pass {}: '{}' -> '{}'",i, lastVal, curVal);
         } while (!curVal.equals(lastVal));
         
         return curVal;
