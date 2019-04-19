@@ -451,6 +451,53 @@ public class OmiEventConfExtensionTest {
     }
     
     @Test
+    public void canProvideTeamQuestDefinitions() throws IOException {
+        final File policyData = temporaryFolder.newFile("teamquest_test_policy_data");
+        try (InputStream is = Resources.getResource("teamquest_test_policy_data").openStream()) {
+            Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot(), "");
+        OmiEventConfExtension omiEventConfExtension = new OmiEventConfExtension(omiDefProvider);
+
+        final List<EventDefinition> eventDefs = omiEventConfExtension.getEventDefinitions();
+
+        // Make sure we have the right number
+        assertThat(eventDefs, hasSize(equalTo(78)));
+
+        // Look for a specific entry
+        EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "NetIQWarning_Cisco");
+        assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getPriority(), equalTo(1000));
+        assertThat(eventDef.getLabel(), equalTo("NetIQWarning_Cisco"));
+        assertThat(eventDef.getSeverity(), equalTo(Severity.WARNING));
+
+        // Validate the log message
+        LogMessage logMessage = eventDef.getLogMessage();
+        assertThat(logMessage, notNullValue());
+        
+        assertThat(logMessage.getContent(), equalTo("%parm[#5]%: %parm[#7]% - %parm[#8]%"));
+//        assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.LOGONLY));
+
+        // Validate the alarm
+        AlarmData alarmData = eventDef.getAlarmData();
+        assertThat(alarmData, notNullValue());
+        // Don't know how to match problems to clears, so everything is a type 3
+        assertThat(alarmData.getType(), equalTo(AlarmType.PROBLEM_WITHOUT_RESOLUTION));
+        // The reduction key should include all parameters referenced from the label (none, in this case)
+        assertThat(alarmData.getReductionKey(), equalTo("%uei%:%dpname%:%nodeid%:%parm[#5]%:%parm[#7]%:%parm[#8]%"));
+        
+        // Validate that the APPLICATION and MSGGRP tokens got transformed into event parameters
+        List<Parameter> parameters = eventDef.getParameters();
+        assertThat(parameters, hasSize(equalTo(2)));
+        Parameter applicationParameter = findParameter(parameters, "Application");
+        assertThat(applicationParameter.getValue(), equalTo("%parm[#9]%"));
+        assertThat(applicationParameter.shouldExpand(), equalTo(true));
+        Parameter msgGrpParameter = findParameter(parameters, "MsgGrp");
+        assertThat(msgGrpParameter.getValue(), equalTo("PBXDiag"));
+    }
+    
+    @Test
     public void canSetPriorityOnCatchAllEvents() throws IOException {
         final File policyData = temporaryFolder.newFile("netapp_test_policy_data");
         try (InputStream is = Resources.getResource("netapp_test_policy_data").openStream()) {

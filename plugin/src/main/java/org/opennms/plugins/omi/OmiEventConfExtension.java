@@ -302,11 +302,11 @@ public class OmiEventConfExtension implements EventConfExtension {
                 }
                 @Override
                 public String getValue() {
-                    return omiTrapDef.getApplication();
+                    return replacePlaceholderTokens(omiTrapDef.getApplication());
                 }
                 @Override
                 public boolean shouldExpand() {
-                    return false;
+                    return getValue().contains("%parm[");
                 }
             };
             parameters.add(applicationParameter);
