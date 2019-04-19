@@ -503,7 +503,7 @@ public class OmiEventConfExtensionTest {
         // Now a difficult, real-life example
         omiPattern = "Major:CPU_Busy_Alarm <1*><@.cpu>,<@.workload><1*> due to cpu_busy_alias<*.cpu_busy>,proc_queuelength_alias<*.proc_queue>,<*>workload_cpu_alias<*.workload_cpu>";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo("Major:CPU_Busy_Alarm .{1}(?<cpu>\\w+?),(?<workload>\\w+?).{1} due to cpu_busy_alias(?<cpu_busy>.*?),proc_queuelength_alias(?<proc_queue>.*?),.*?workload_cpu_alias(?<workload_cpu>.*?)"));
+                   equalTo("Major:CPU_Busy_Alarm .{1}(?<cpu>\\w+?),(?<workload>\\w+?).{1} due to cpu_busy_alias(?<cpuBusy>.*?),proc_queuelength_alias(?<procQueue>.*?),.*?workload_cpu_alias(?<workloadCpu>.*?)"));
     
         // And another real-life one
         omiPattern = "^/<*>/[<*.source>%<@>|<*.source>]$";
@@ -530,6 +530,15 @@ public class OmiEventConfExtensionTest {
         String omiPattern = "^<[<*>Common/rbac<*>].message>$";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
                    equalTo("^(?<message>(?:.*?Common/rbac.*?).message)$"));
+    }
+    
+    @Test
+    public void canAdaptVarNamesToRegex() throws Exception {
+        String omiVar = "host_name";
+        assertThat(OmiEventConfExtension.adaptUserVarNameToRegex(omiVar), equalTo("hostName"));
+        
+        omiVar = "host_name-too";
+        assertThat(OmiEventConfExtension.adaptUserVarNameToRegex(omiVar), equalTo("hostNameToo"));
     }
     
     private static EventDefinition findEvent(List<EventDefinition> eventDefs, String uei) {

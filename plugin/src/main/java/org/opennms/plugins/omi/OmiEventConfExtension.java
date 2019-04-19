@@ -80,6 +80,7 @@ public class OmiEventConfExtension implements EventConfExtension {
     private static final Pattern NEGATED_ACTION_GROUP_PATTERN = Pattern.compile("(?<!\\{1})<!(\\[[^\\]]+\\])>");
     private static final Pattern COMPLEX_ACTION_GROUP_PATTERN = Pattern.compile("(?<!\\{1})<(\\d+)?([*@#_/S])(\\.[A-Za-z][A-Za-z0-9_-]+)?>");
     private static final Pattern INNER_GROUPING_PATTERN = Pattern.compile("(?<!\\{1})\\[([^\\]]+)(?<!\\{1})\\]");
+    private static final Pattern ALPHA_LC_CHARS_PRECEDED_BY_NON_ALPHANUM = Pattern.compile("(?<=[^A-Za-z0-9]+)([a-z])");
 
     private final OmiDefinitionProvider omiDefinitionProvider;
 
@@ -648,10 +649,13 @@ public class OmiEventConfExtension implements EventConfExtension {
             final String userVar = mat.group(3);
             
             if (userVar != null) {
+                // Note that OMi user var names may contain some non-alphanumeric characters,
+                // but regex named-capturing group names may not. Deal with this first.
+                // Note also that userVar carries the leading dot, so we do substring(1) to drop it
+                final String ncgName = adaptUserVarNameToRegex(userVar.substring(1));
                 // This opens a named-capturing group, which we will close down below
                 // e.g. "(?<stuff>" in case of "<*.stuff>"
-                // Note that userVar carries the leading dot, so we do substring(1) to drop it
-                workingSb.append("(?<").append(userVar.substring(1)).append(">");
+                workingSb.append("(?<").append(ncgName).append(">");
             }
             switch(globToken) {
             case "*":
@@ -752,9 +756,14 @@ public class OmiEventConfExtension implements EventConfExtension {
             
             workingSb = new StringBuilder();
             final String groupBody = mat.group(1);
-            final String varName = mat.group(2);
-            // Note that userVar carries the leading dot, so we do substring(1) to drop it
-            workingSb.append("(?<").append(varName.substring(1)).append(">").append(groupBody).append(")");
+            final String userVar = mat.group(2);
+            
+            // Note that OMi user var names may contain some non-alphanumeric characters,
+            // but regex named-capturing group names may not. Deal with this first.
+            // Note also that userVar carries the leading dot, so we do substring(1) to drop it
+            final String ncgName = adaptUserVarNameToRegex(userVar.substring(1));
+            
+            workingSb.append("(?<").append(ncgName).append(">").append(groupBody).append(")");
 
             LOG.debug("Appending replacement '{}' for AssignOnlyActionGroup range {}-{}", workingSb.toString(), mat.start(), mat.end());
             mat.appendReplacement(replSb, workingSb.toString());
@@ -775,5 +784,38 @@ public class OmiEventConfExtension implements EventConfExtension {
         }
         mat.appendTail(replSb);
         return "".equals(replSb.toString()) ? output : replSb.toString();
+    }
+    
+    // Given the name of an OMi policy user variable (which may contain
+    // underscores and dashes, at least), convert to a purely alphanumeric
+    // name as required for use as a regex named-capturing group. We do this
+    // by camel-casing.
+    public static String adaptUserVarNameToRegex(final String input) {
+        LOG.debug("adaptUserVarNameToRegex: Dealing with var name '{}'", input);
+        if (input == null) {
+            return null;
+        }
+        String output = input;
+        if (input.matches("^[A-Za-z][A-Za-z0-9]+$")) {
+            LOG.debug("adaptUserVarNameToRegex: var name {} does not require adaptation. Returning unmodified.", input);
+            return output;
+        }
+        
+        // First, upper-case any lower-case letters preced by a non-alphanumeric
+        Matcher mat = ALPHA_LC_CHARS_PRECEDED_BY_NON_ALPHANUM.matcher(input);
+        StringBuffer replSb = new StringBuffer();
+        while (mat.find()) {
+            String successorChar = mat.group(1);
+            LOG.debug("adaptUserVarNameToRegex: upper-casing char '{}' of var name '{}'", successorChar, input);
+            mat.appendReplacement(replSb, successorChar.toUpperCase());
+        }
+        mat.appendTail(replSb);
+        
+        if (! "".equals(replSb.toString())) {
+            output = replSb.toString();
+        }
+
+        // Then strain out any remaining non-alphanumerics
+        return output.replaceAll("[^A-Za-z0-9]+", "");
     }
 }
