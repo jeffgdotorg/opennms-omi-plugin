@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.opennms.integration.api.v1.config.events.AlarmData;
 import org.opennms.integration.api.v1.config.events.AlarmType;
@@ -215,8 +216,15 @@ public class OmiEventConfExtension implements EventConfExtension {
                                 LOG.debug("Varbind #{} constraint value '{}' looks literal. Skipping regex transformation.");
                             }
                             else {
-                                vbString = "~" + translateOmiPatternToRegex(inValue);
-                                LOG.debug("Translated OMi pattern '{}' to regex '{}'", inValue, vbString);
+                                final String candidateVbString = translateOmiPatternToRegex(inValue);
+                                try {
+                                    Pattern.compile(candidateVbString);
+                                    vbString = "~" + candidateVbString;
+                                    LOG.debug("Translated OMi pattern '{}' to regex '{}'", inValue, vbString);
+                                } catch (PatternSyntaxException pse) {
+                                    LOG.warn("Failed to compile regex '{}' for trap {}. Including as a literal, but this rule will never match.", candidateVbString, omiTrapDef.getLabel());
+                                    vbString = "!!BROKEN!! " + candidateVbString;
+                                }
                             }
                             vbValues.add(vbString);
                         }
