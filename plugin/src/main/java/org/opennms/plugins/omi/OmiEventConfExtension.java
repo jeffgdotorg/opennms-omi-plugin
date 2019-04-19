@@ -209,8 +209,12 @@ public class OmiEventConfExtension implements EventConfExtension {
                             if (isGratuitouslyRegexedInteger(inValue)) {
                                 vbString = inValue.substring(1, inValue.length() - 1);
                                 LOG.debug("Varbind #{} constraint value '{}' is a gratuitously-anchored integer value. Extracting and using sans regex in eventconf vbvalue: '{}'.", dtoVb.getVbOrdinal(), inValue, vbString);
-                            } else {
-                                vbString = translateOmiPatternToRegex(inValue);
+                            } else if (looksLiteral(inValue)) {
+                                vbString = inValue;
+                                LOG.debug("Varbind #{} constraint value '{}' looks literal. Skipping regex transformation.");
+                            }
+                            else {
+                                vbString = "~" + translateOmiPatternToRegex(inValue);
                                 LOG.debug("Translated OMi pattern '{}' to regex '{}'", inValue, vbString);
                             }
                             vbValues.add(vbString);
@@ -534,7 +538,7 @@ public class OmiEventConfExtension implements EventConfExtension {
         return input.replace("\n", "<br/>");
     }
     
-    public static boolean isGratuitouslyRegexedInteger(String string) {
+    public static boolean isGratuitouslyRegexedInteger(final String string) {
         if (string == null) {
             return false;
         }
@@ -543,6 +547,21 @@ public class OmiEventConfExtension implements EventConfExtension {
             if (middle.matches("^\\d+$")) {
                 return true;
             }
+        }
+        return false;
+    }
+    
+    public static boolean looksLiteral(final String string) {
+        if (string == null) {
+            return false;
+        }
+        if     (   ! string.startsWith("^")
+                && ! string.endsWith("$")
+                && ! string.contains("<")
+                && ! string.contains(">")
+                && ! string.contains("[")
+                && ! string.contains("]")) {
+            return true;
         }
         return false;
     }
