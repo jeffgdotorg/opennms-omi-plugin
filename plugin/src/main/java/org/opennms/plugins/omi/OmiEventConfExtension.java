@@ -118,6 +118,9 @@ public class OmiEventConfExtension implements EventConfExtension {
         orderedEventDefinitions.addAll(msgUnmatchDefinitions);
         
         LOG.debug("Returning {} ordered event definitions", orderedEventDefinitions.size());
+        for (EventDefinition eDef : orderedEventDefinitions) {
+            LOG.debug("Event: {}", eDef.getUei());
+        }
         return orderedEventDefinitions;
     }
     
