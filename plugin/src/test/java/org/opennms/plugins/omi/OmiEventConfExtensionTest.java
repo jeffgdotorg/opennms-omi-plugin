@@ -631,11 +631,10 @@ public class OmiEventConfExtensionTest {
     }
     
     @Test
-    @Ignore
     public void canReplaceMixedBags() throws Exception {
         String omiPattern = "^<[<*>Common/rbac<*>].message>$";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo("^(?<message>(?:.*?Common/rbac.*?).message)$"));
+                   equalTo("^(?<message>(?:.*?Common/rbac.*?))$"));
     }
     
     @Test
