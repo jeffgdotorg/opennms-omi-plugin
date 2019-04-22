@@ -431,7 +431,7 @@ public class OmiEventConfExtensionTest {
         assertThat(logMessage, notNullValue());
         
         assertThat(logMessage.getContent(), equalTo("burmActivityTrap"));
-        assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.DONOTPERSIST));
+        assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.DISCARDTRAPS));
 
         // Validate the alarm
         AlarmData alarmData = eventDef.getAlarmData();

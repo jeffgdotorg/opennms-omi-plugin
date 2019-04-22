@@ -147,10 +147,10 @@ public class OmiEventConfExtension implements EventConfExtension {
                     return LogMsgDestType.LOGNDISPLAY;
                 }
                 if (omiTrapDef.getMatchType() == MatchType.SUPP_MATCH) {
-                    return LogMsgDestType.DONOTPERSIST;
+                    return LogMsgDestType.DISCARDTRAPS;
                 }
                 if (omiTrapDef.getMatchType() == MatchType.SUPP_UNMATCH) {
-                    return LogMsgDestType.DONOTPERSIST;
+                    return LogMsgDestType.DISCARDTRAPS;
                 }
                 return LogMsgDestType.LOGNDISPLAY;
             }
