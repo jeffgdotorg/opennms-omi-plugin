@@ -178,9 +178,6 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                 if ("OBJECT".equals(lastChild.getText())) {
                     trapDef.setObject(stripQuotes(child.getText()));
                 }
-                if ("SERVERLOGONLY".equals(lastChild.getText())) {
-                    trapDef.setServerLogOnly(true);
-                }
                 if ("MSGKEY".equals(lastChild.getText())) {
                     trapDef.setMsgKey(stripQuotes(child.getText()));
                 }
@@ -191,6 +188,9 @@ public class MyOMiPolicyVisitor<T> extends OMiPolicyBaseVisitor<T> {
                     trapDef.setMsgKeyRelation(stripQuotes(child.getText()));
                     inMsgKeyRelation = false;
                 }
+            }
+            if ("SERVERLOGONLY".equals(child.getText())) {
+                trapDef.setServerLogOnly(true);
             }
             lastChild = child;
         }

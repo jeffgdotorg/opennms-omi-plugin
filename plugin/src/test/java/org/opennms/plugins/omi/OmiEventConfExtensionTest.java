@@ -348,7 +348,7 @@ public class OmiEventConfExtensionTest {
         assertThat(logMessage, notNullValue());
         
         assertThat(logMessage.getContent(), equalTo("Agent Up with Possible Changes (coldStart Trap)"));
-        assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.LOGNDISPLAY));
+        assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.LOGONLY));
 
         // Validate the alarm
         AlarmData alarmData = eventDef.getAlarmData();
@@ -402,6 +402,18 @@ public class OmiEventConfExtensionTest {
         assertThat(applicationParameter.getValue(), equalTo("TandBerg"));
         msgGrpParameter = findParameter(parameters, "MsgGrp");
         assertThat(msgGrpParameter.getValue(), equalTo("Video"));
+        
+        // Look for the bottom catch-all entry, and validate that <$*> translated correctly
+        eventDef = findEvent(eventDefs, UEI_PREFIX + "TandBerg_Generic_Event");
+        assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getPriority(), equalTo(1000));
+        assertThat(eventDef.getLabel(), equalTo("TandBerg_Generic_Event"));
+        
+        // Validate the logmsg.dest
+        logMessage = eventDef.getLogMessage();
+        assertThat(logMessage, notNullValue());
+        assertThat(logMessage.getContent(), equalTo("%parm[all]%"));
+        assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.LOGONLY));
     }
     
     @Test

@@ -64,7 +64,8 @@ public class OmiEventConfExtension implements EventConfExtension {
 
     private static final Logger LOG = LoggerFactory.getLogger(OmiEventConfExtension.class);
 
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("<\\$(\\d+)>");
+    private static final Pattern PLACEHOLDER_PATTERN_INTRINSIC = Pattern.compile("<\\$(\\d+|[*#@ACEeFGSsTVXx]|MSG_TEXT|MSG_ID|MSG_NODE_NAME)>");
+    private static final Pattern PLACEHOLDER_PATTERN_USERVAR = Pattern.compile("(<[A-Za-z][A-Za-z0-9_-]+)>");
     
     private static final Pattern BARE_EMAILADDR_PATTERN = Pattern.compile("([^>:])([^,@ ]+@[^,@ \n]+)\\b");
     
@@ -479,22 +480,75 @@ public class OmiEventConfExtension implements EventConfExtension {
         return Severity.get(omiSeverity.toLowerCase());
     }
 
-    public static String replacePlaceholderTokens(String string) {
-        if (string == null) {
+    public static String replacePlaceholderTokens(final String input) {
+        if (input == null) {
             return null;
         }
-        final Matcher m = PLACEHOLDER_PATTERN.matcher(string);
-        boolean result = m.find();
-        if (result) {
-            StringBuffer sb = new StringBuffer();
-            do {
-                m.appendReplacement(sb, String.format("%%parm[#%s]%%", m.group(1)));
-                result = m.find();
-            } while (result);
-            m.appendTail(sb);
-            return sb.toString();
+        String output = input;
+        final Matcher mat = PLACEHOLDER_PATTERN_INTRINSIC.matcher(input);
+        StringBuffer replSb = new StringBuffer();
+        StringBuilder workingSb = new StringBuilder();
+        while (mat.find()) {
+            workingSb = new StringBuilder();
+            final String tokenName = mat.group(1);
+            if (tokenName == null) {
+                continue;
+            }
+            // *#@ACEeFGSsTVXx
+            if (tokenName.matches("^\\d+$")) {
+                // Returns one or more of the fifteen possible event parameters that are part of an SNMP event.
+                // (<$1> returns the first variable, <$2> returns the second variable, and so on.) 
+                workingSb.append("%parm[").append("#").append(tokenName).append("]%");
+            } else if (tokenName.equals("*")) {
+                // Returns all variables assigned to the event up to the possible fifteen
+                workingSb.append("%parm[all]%");
+            } else if (tokenName.equals("#")) {
+                // Returns the number of variables in an enterprise-specific SNMP event
+                workingSb.append("%parm[##]%");
+            } else if (tokenName.equals("@")) {
+                // Returns the time the event was received as the number of seconds since Jan 1, 1970 using the time_t representation
+                LOG.warn("Policy variable <$@> is not directly translatable. Substituting a long textual UTC timestamp.");
+                workingSb.append("%time%");
+            } else if (tokenName.equals("A")) {
+                // Returns the node that produced the event
+                workingSb.append("%snmphost%");
+            } else if (tokenName.equals("C")) {
+                // Returns the community of the event
+                workingSb.append("%community%");
+            } else if (tokenName.equals("E")) {
+                // Returns the enterprise ID of the event
+                workingSb.append("%id%");
+            } else if (tokenName.equals("e")) {
+                // Returns the enterprise ID of the event
+                workingSb.append("%id%");
+            } else if (tokenName.equals("G")) {
+                // Returns the generic event ID
+                workingSb.append("%generic%");
+            } else if (tokenName.equals("S")) {
+                // Returns the specific event ID
+                workingSb.append("%specific%");
+            } else if (tokenName.equals("s")) {
+                // Returns the event's severity
+                workingSb.append("%severity%");
+            } else if (tokenName.equals("T")) {
+                // Returns the event time stamp
+                workingSb.append("%time%");
+            } else if (tokenName.equals("V")) {
+                // Returns the event type, based on the transport from which the event was received. Currently supported types
+                // are SNMPv1, SNMPv2, CMIP, GENERIC, and SNMPv2INFORM
+                workingSb.append("SNMP%version%");
+            } else if (tokenName.equals("X") || tokenName.equals("x")) {
+                // Returns the time / date the event was received using the local time representation
+                LOG.warn("Policy variables <$X> and <$x> are not directly translabable. Substituting a short UTC date+time.");
+                workingSb.append("%shorttime%");
+            } else {
+                LOG.warn("Policy variable <${}> has no translation. Leaving token intact.", tokenName);
+                workingSb.append("<$").append(tokenName).append(">");
+            }
+            mat.appendReplacement(replSb, workingSb.toString());
         }
-        return string;
+        mat.appendTail(replSb);
+        return "".equals(replSb.toString()) ? output : replSb.toString();
     }
 
     public static List<String> extractPlaceholderTokens(String string) {
@@ -502,7 +556,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             return Collections.emptyList();
         }
         final List<String> tokens = new ArrayList<>();
-        final Matcher m = PLACEHOLDER_PATTERN.matcher(string);
+        final Matcher m = PLACEHOLDER_PATTERN_INTRINSIC.matcher(string);
         while(m.find()) {
             tokens.add(String.format("%%parm[#%s]%%", m.group(1)));
         }

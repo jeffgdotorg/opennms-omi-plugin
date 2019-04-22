@@ -171,6 +171,13 @@ public class OmiDefinitionProviderTest {
         assertThat(trapDef, notNullValue());
         assertThat(trapDef.isCatchAll(), equalTo(false));
         assertThat(trapDef.getObject(), equalTo("<$33>"));
+        
+        // Check that the final entry is marked as server-log-only
+        trapDef = trapDefs.get(trapDefs.size()-1);
+        assertThat(trapDef, notNullValue());
+        assertThat(trapDef.getText(), equalTo("<$*>"));
+        assertThat(trapDef.getLabel(), equalTo("TandBerg_Generic_Event"));
+        assertThat(trapDef.isServerLogOnly(), equalTo(true));
      }
     
     @Test
@@ -190,7 +197,6 @@ public class OmiDefinitionProviderTest {
         OmiTrapDef trapDef = findTrap(trapDefs, ".1.3.6.1.4.1.15597.1.1.2.1", 6, 1);
         assertThat(trapDef, notNullValue());
         assertThat(trapDef.isCatchAll(), equalTo(false));
-        LOG.debug("Found what should be a burmActivityTrap: {}", trapDef.toString());
     }
     
     @Test
