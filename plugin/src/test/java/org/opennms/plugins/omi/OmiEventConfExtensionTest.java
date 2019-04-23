@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import org.jline.utils.Log;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -68,9 +69,9 @@ public class OmiEventConfExtensionTest {
 
     @Test
     public void canReplacePlaceholderTokens() {
-        assertThat(OmiEventConfExtension.replacePlaceholderTokens("<$1>"), equalTo("%parm[#1]%"));
-        assertThat(OmiEventConfExtension.replacePlaceholderTokens("<$2>"), equalTo("%parm[#2]%"));
-        assertThat(OmiEventConfExtension.replacePlaceholderTokens("<$1>-<$2>"), equalTo("%parm[#1]%-%parm[#2]%"));
+        assertThat(OmiEventConfExtension.replacePolicyvarPlaceholderTokens("<$1>"), equalTo("%parm[#1]%"));
+        assertThat(OmiEventConfExtension.replacePolicyvarPlaceholderTokens("<$2>"), equalTo("%parm[#2]%"));
+        assertThat(OmiEventConfExtension.replacePolicyvarPlaceholderTokens("<$1>-<$2>"), equalTo("%parm[#1]%-%parm[#2]%"));
     }
 
     @Test
@@ -536,7 +537,7 @@ public class OmiEventConfExtensionTest {
         assertThat(logMessage, notNullValue());
         
         assertThat(logMessage.getContent(), equalTo("%parm[#1]%"));
-//        assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.LOGONLY));
+        assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.LOGNDISPLAY));
 
         // Validate the alarm
         AlarmData alarmData = eventDef.getAlarmData();
@@ -554,6 +555,27 @@ public class OmiEventConfExtensionTest {
         assertThat(applicationParameter.shouldExpand(), equalTo(false));
         Parameter msgGrpParameter = findParameter(parameters, "MsgGrp");
         assertThat(msgGrpParameter.getValue(), equalTo("Performance_SPB"));
+        
+        // Look for a second event, and validate user variable substitution in its logmsg
+        eventDef = findEvent(eventDefs, UEI_PREFIX + "TeamQuest_Event_Critical_High_Disk_Response");
+        assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getPriority(), equalTo(1000));
+        assertThat(eventDef.getLabel(), equalTo("TeamQuest_Event_Critical_High_Disk_Response"));
+        assertThat(eventDef.getSeverity(), equalTo(Severity.CRITICAL));
+        
+        Mask mask = eventDef.getMask();
+        assertThat(mask, notNullValue());
+        assertThat(mask.getVarbinds().size(), equalTo(1));
+        Varbind vb = mask.getVarbinds().get(0);
+        assertThat(vb, notNullValue());
+        assertThat(vb.getNumber(), equalTo(1));
+        assertThat(vb.getValues().size(), equalTo(1));
+        assertThat(vb.getValues().get(0), equalTo("~^(?<server>\\w+?) - Critical:High_Disk_Response \\w+? (?<message>.*?) at"));
+        
+        // Validate the log message
+        logMessage = eventDef.getLogMessage();
+        assertThat(logMessage.getContent(), equalTo("Critical:High_Disk_Response %parm[message]%"));
+        assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.LOGNDISPLAY));
     }
     
     @Test
@@ -644,6 +666,9 @@ public class OmiEventConfExtensionTest {
         
         omiVar = "host_name-too";
         assertThat(OmiEventConfExtension.adaptUserVarNameToRegex(omiVar), equalTo("hostNameToo"));
+        
+        omiVar = "message";
+        assertThat(OmiEventConfExtension.adaptUserVarNameToRegex(omiVar), equalTo("message"));
     }
     
     private static EventDefinition findEvent(List<EventDefinition> eventDefs, String uei) {

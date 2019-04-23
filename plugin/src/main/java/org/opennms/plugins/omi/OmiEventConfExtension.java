@@ -64,8 +64,8 @@ public class OmiEventConfExtension implements EventConfExtension {
 
     private static final Logger LOG = LoggerFactory.getLogger(OmiEventConfExtension.class);
 
-    private static final Pattern PLACEHOLDER_PATTERN_INTRINSIC = Pattern.compile("<\\$(\\d+|[*#@ACEeFGSsTVXx]|MSG_TEXT|MSG_ID|MSG_NODE_NAME)>");
-    private static final Pattern PLACEHOLDER_PATTERN_USERVAR = Pattern.compile("(<[A-Za-z][A-Za-z0-9_-]+)>");
+    private static final Pattern PLACEHOLDER_PATTERN_POLICYVAR = Pattern.compile("<\\$(\\d+|[*#@ACEeFGSsTVXx]|MSG_TEXT|MSG_ID|MSG_NODE_NAME)>");
+    private static final Pattern PLACEHOLDER_PATTERN_USERVAR = Pattern.compile("<([A-Za-z][A-Za-z0-9_-]+)>");
     
     private static final Pattern BARE_EMAILADDR_PATTERN = Pattern.compile("([^>:])([^,@ ]+@[^,@ \n]+)\\b");
     
@@ -131,9 +131,9 @@ public class OmiEventConfExtension implements EventConfExtension {
             @Override
             public String getContent() {
                 if (omiTrapDef.getText() == null) {
-                    return replacePlaceholderTokens(omiTrapDef.getLabel());
+                    return replaceUservarPlaceholderTokens(replacePolicyvarPlaceholderTokens(omiTrapDef.getLabel()));
                 } else {
-                    return replacePlaceholderTokens(omiTrapDef.getText());                    
+                    return replaceUservarPlaceholderTokens(replacePolicyvarPlaceholderTokens(omiTrapDef.getText()));
                 }
             }
             @Override
@@ -306,7 +306,7 @@ public class OmiEventConfExtension implements EventConfExtension {
                 }
                 @Override
                 public String getValue() {
-                    return replacePlaceholderTokens(omiTrapDef.getApplication());
+                    return replacePolicyvarPlaceholderTokens(omiTrapDef.getApplication());
                 }
                 @Override
                 public boolean shouldExpand() {
@@ -340,7 +340,7 @@ public class OmiEventConfExtension implements EventConfExtension {
                 }
                 @Override
                 public String getValue() {
-                    return replacePlaceholderTokens(omiTrapDef.getObject());
+                    return replacePolicyvarPlaceholderTokens(omiTrapDef.getObject());
                 }
                 @Override
                 public boolean shouldExpand() {
@@ -403,13 +403,13 @@ public class OmiEventConfExtension implements EventConfExtension {
         final AlarmType alarmType = AlarmType.PROBLEM_WITHOUT_RESOLUTION;
         List<UpdateField> updateFields = new ArrayList<>();
         if (trapDef.getMsgKey() != null) {
-            reductionKey = replacePlaceholderTokens(trapDef.getMsgKey());
+            reductionKey = replacePolicyvarPlaceholderTokens(trapDef.getMsgKey());
         } else {
             reductionKey = inferReductionKey(trapDef);
         }
         
         if (trapDef.getMsgKeyRelation() != null) {
-            clearKey = replacePlaceholderTokens(trapDef.getMsgKeyRelation());
+            clearKey = replacePolicyvarPlaceholderTokens(trapDef.getMsgKeyRelation());
             updateFields.add(new UpdateField() {
                 @Override
                 public String getName() {
@@ -479,13 +479,13 @@ public class OmiEventConfExtension implements EventConfExtension {
         }
         return Severity.get(omiSeverity.toLowerCase());
     }
-
-    public static String replacePlaceholderTokens(final String input) {
+    
+    public static String replacePolicyvarPlaceholderTokens(final String input) {
         if (input == null) {
             return null;
         }
         String output = input;
-        final Matcher mat = PLACEHOLDER_PATTERN_INTRINSIC.matcher(input);
+        final Matcher mat = PLACEHOLDER_PATTERN_POLICYVAR.matcher(input);
         StringBuffer replSb = new StringBuffer();
         StringBuilder workingSb = new StringBuilder();
         while (mat.find()) {
@@ -494,7 +494,6 @@ public class OmiEventConfExtension implements EventConfExtension {
             if (tokenName == null) {
                 continue;
             }
-            // *#@ACEeFGSsTVXx
             if (tokenName.matches("^\\d+$")) {
                 // Returns one or more of the fifteen possible event parameters that are part of an SNMP event.
                 // (<$1> returns the first variable, <$2> returns the second variable, and so on.) 
@@ -550,13 +549,32 @@ public class OmiEventConfExtension implements EventConfExtension {
         mat.appendTail(replSb);
         return "".equals(replSb.toString()) ? output : replSb.toString();
     }
+    
+    public static String replaceUservarPlaceholderTokens(final String input) {
+        if (input == null) {
+            return null;
+        }
+        String output = input;
+        final Matcher mat = PLACEHOLDER_PATTERN_USERVAR.matcher(input);
+        StringBuffer replSb = new StringBuffer();
+        while (mat.find()) {
+            final String varName = mat.group(1);
+            if (varName == null) {
+                continue;
+            }
+            mat.appendReplacement(replSb, String.format("%%parm[%s]%%", adaptUserVarNameToRegex(varName)));
+        }
+        mat.appendTail(replSb);
+        return "".equals(replSb.toString()) ? output : replSb.toString();
+    }
+
 
     public static List<String> extractPlaceholderTokens(String string) {
         if (string == null) {
             return Collections.emptyList();
         }
         final List<String> tokens = new ArrayList<>();
-        final Matcher m = PLACEHOLDER_PATTERN_INTRINSIC.matcher(string);
+        final Matcher m = PLACEHOLDER_PATTERN_POLICYVAR.matcher(string);
         while(m.find()) {
             tokens.add(String.format("%%parm[#%s]%%", m.group(1)));
         }
@@ -866,7 +884,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             return output;
         }
         
-        // First, upper-case any lower-case letters preced by a non-alphanumeric
+        // First, upper-case any lower-case letters preceded by a non-alphanumeric
         Matcher mat = ALPHA_LC_CHARS_PRECEDED_BY_NON_ALPHANUM.matcher(input);
         StringBuffer replSb = new StringBuffer();
         while (mat.find()) {
