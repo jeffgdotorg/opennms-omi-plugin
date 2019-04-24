@@ -626,7 +626,7 @@ public class OmiEventConfExtensionTest {
         // This one challenged me late in development
         omiPattern = "I need a <[foo|bar].thing>, please";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo("I need a (?<thing>(?:foo|bar)), please"));
+                   equalTo("I need a (?<thing>(foo|bar)), please"));
         
         // Now a difficult, real-life example
         omiPattern = "Major:CPU_Busy_Alarm <1*><@.cpu>,<@.workload><1*> due to cpu_busy_alias<*.cpu_busy>,proc_queuelength_alias<*.proc_queue>,<*>workload_cpu_alias<*.workload_cpu>";
@@ -636,7 +636,7 @@ public class OmiEventConfExtensionTest {
         // And another real-life one
         omiPattern = "^/<*>/[<*.source>%<@>|<*.source>]$";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo("^/.*?/(?:(?<source>.*?)%\\w+?|(?<source>.*?))$"));
+                   equalTo("^/.*?/((?<source>.*?)%\\w+?|(?<source>.*?))$"));
     }
     
     @Test
@@ -644,19 +644,19 @@ public class OmiEventConfExtensionTest {
         // Easy one first
         String omiPattern = "This [foo|bar] is whatever";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo("This (?:foo|bar) is whatever"));
+                   equalTo("This (foo|bar) is whatever"));
         
         // Now a nested few
         omiPattern = "Th[is one|ese[two|three|many]] [is|are] a number";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo("Th(?:is one|ese(?:two|three|many)) (?:is|are) a number"));
+                   equalTo("Th(is one|ese(two|three|many)) (is|are) a number"));
     }
     
     @Test
     public void canReplaceMixedBags() throws Exception {
         String omiPattern = "^<[<*>Common/rbac<*>].message>$";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo("^(?<message>(?:.*?Common/rbac.*?))$"));
+                   equalTo("^(?<message>(.*?Common/rbac.*?))$"));
     }
     
     @Test
