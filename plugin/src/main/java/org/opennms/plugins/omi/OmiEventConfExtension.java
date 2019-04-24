@@ -400,16 +400,19 @@ public class OmiEventConfExtension implements EventConfExtension {
     
     public static AlarmData toAlarmData(OmiTrapDef trapDef) {
         final String reductionKey, clearKey;
-        final AlarmType alarmType = AlarmType.PROBLEM_WITHOUT_RESOLUTION;
+        AlarmType workingAlarmType;
         List<UpdateField> updateFields = new ArrayList<>();
         if (trapDef.getMsgKey() != null) {
-            reductionKey = replacePolicyvarPlaceholderTokens(trapDef.getMsgKey());
+            workingAlarmType = AlarmType.PROBLEM;
+            reductionKey = replaceUservarPlaceholderTokens(replacePolicyvarPlaceholderTokens(trapDef.getMsgKey()));
         } else {
+            workingAlarmType = AlarmType.PROBLEM_WITHOUT_RESOLUTION;
             reductionKey = inferReductionKey(trapDef);
         }
         
         if (trapDef.getMsgKeyRelation() != null) {
-            clearKey = replacePolicyvarPlaceholderTokens(trapDef.getMsgKeyRelation());
+            workingAlarmType = AlarmType.RESOLUTION;
+            clearKey = replaceUservarPlaceholderTokens(replacePolicyvarPlaceholderTokens(trapDef.getMsgKeyRelation()));
             updateFields.add(new UpdateField() {
                 @Override
                 public String getName() {
@@ -433,6 +436,7 @@ public class OmiEventConfExtension implements EventConfExtension {
         } else {
             clearKey = null;
         }
+        final AlarmType finalAlarmType = workingAlarmType;
         
         return new AlarmData() {
 
@@ -442,7 +446,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
             @Override
             public AlarmType getType() {
-                return alarmType;
+                return finalAlarmType;
             }
             @Override
             public String getClearKey() {
