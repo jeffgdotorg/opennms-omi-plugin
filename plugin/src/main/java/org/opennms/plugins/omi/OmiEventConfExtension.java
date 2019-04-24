@@ -544,9 +544,18 @@ public class OmiEventConfExtension implements EventConfExtension {
                 // Returns the time / date the event was received using the local time representation
                 LOG.warn("Policy variables <$X> and <$x> are not directly translabable. Substituting a short UTC date+time.");
                 workingSb.append("%shorttime%");
+            } else if (tokenName.equals("MSG_TEXT")) {
+                // Returns the full text of the event.
+                workingSb.append("%logmsg%");
+            } else if (tokenName.equals("MSG_ID")) {
+                // Returns the unique identity number of the event.
+                workingSb.append("%eventid%");
+            } else if (tokenName.equals("MSG_NODE_NAME")) {
+                // Returns the hostname of the node on which the original event took place (this is the hostname that the agent resolves for the node).
+                workingSb.append("%interfaceresolve%");
             } else {
-                LOG.warn("Policy variable <${}> has no translation. Leaving token intact.", tokenName);
-                workingSb.append("<$").append(tokenName).append(">");
+                LOG.warn("Policy variable <${}> has no translation. Leaving token intact as an event parameter expansion. Runtime result will be empty.", tokenName);
+                workingSb.append("%parm[").append(tokenName).append("]%");
             }
             mat.appendReplacement(replSb, workingSb.toString());
         }
