@@ -71,7 +71,7 @@ public class OmiEventConfExtension implements EventConfExtension {
     
     private static final Pattern BARE_HTTPLINK_PATTERN = Pattern.compile("([^\">])(https?://.*?)([ \n]|$)");
     
-    protected static final String TOKEN_ASTERISK_REGEX_EQUIVALENT = ".";
+    protected static final String TOKEN_ASTERISK_REGEX_EQUIVALENT = "\\.";
     protected static final String TOKEN_AT_REGEX_EQUIVALENT = "\\w";
     protected static final String TOKEN_HASH_REGEX_EQUIVALENT = "\\d";
     protected static final String TOKEN_UNDERSCORE_REGEX_EQUIVALENT = "(_|/|\\|:|-)";
@@ -876,7 +876,7 @@ public class OmiEventConfExtension implements EventConfExtension {
         Matcher mat = INNER_GROUPING_PATTERN.matcher(output);
         StringBuffer replSb = new StringBuffer();
         while (mat.find()) {
-            mat.appendReplacement(replSb, "(?:$1)");
+            mat.appendReplacement(replSb, "($1)");
         }
         mat.appendTail(replSb);
         return "".equals(replSb.toString()) ? output : replSb.toString();
