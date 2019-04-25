@@ -728,6 +728,13 @@ public class OmiEventConfExtension implements EventConfExtension {
             LOG.debug("SquareBrackets Pass {}: {} -> {}",i, lastVal.length(), curVal.length());
         } while (!curVal.equals(lastVal));
         
+        // Now, unless the pattern is anchored to beginning / end, let it be a substring
+        if (! curVal.startsWith("^") && ! curVal.startsWith(".*")) {
+            curVal = ".*" + curVal;
+        }
+        if (! curVal.endsWith("$") && ! curVal.endsWith(".*")) {
+            curVal += ".*";
+        }
         return curVal;
     }
     
