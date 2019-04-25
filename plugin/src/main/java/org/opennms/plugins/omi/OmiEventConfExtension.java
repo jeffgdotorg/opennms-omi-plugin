@@ -215,9 +215,13 @@ public class OmiEventConfExtension implements EventConfExtension {
                             if (isGratuitouslyRegexedInteger(inValue)) {
                                 vbString = inValue.substring(1, inValue.length() - 1);
                                 LOG.debug("Varbind #{} constraint value '{}' is a gratuitously-anchored integer value. Extracting and using sans regex in eventconf vbvalue: '{}'.", dtoVb.getVbOrdinal(), inValue, vbString);
-                            } else if (looksLiteral(inValue)) {
+                            } else if (isLiteralInteger(inValue)) {
                                 vbString = inValue;
-                                LOG.debug("Varbind #{} constraint value '{}' looks literal. Skipping regex transformation.");
+                                LOG.debug("Varbind #{} constraint value '{}' is a bare integer value. Using verbatim in eventconf vbvalue: '{}'", dtoVb.getVbOrdinal(), inValue, vbString);
+                            } else if (looksLiteral(inValue)) {
+                                LOG.debug("Varbind #{} constraint value '{}' looks literal. Skipping regex transformation and adapting as simple substring regex.");
+                                StringBuilder sb = new StringBuilder("~.*").append(inValue).append(".*");
+                                vbString = sb.toString();
                             }
                             else {
                                 final String candidateVbString = translateOmiPatternToRegex(inValue);
@@ -644,6 +648,16 @@ public class OmiEventConfExtension implements EventConfExtension {
             if (middle.matches("^\\d+$")) {
                 return true;
             }
+        }
+        return false;
+    }
+    
+    public static boolean isLiteralInteger(final String string) {
+        if (string == null) {
+            return false;
+        }
+        if (string.matches("^\\d+$")) {
+            return true;
         }
         return false;
     }
