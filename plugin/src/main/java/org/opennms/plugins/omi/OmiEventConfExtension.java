@@ -604,7 +604,7 @@ public class OmiEventConfExtension implements EventConfExtension {
         }
         String result = decorateEmailAddresses(input);
         result = decorateHttpLinks(result);
-        result = decorateNewlines(result);
+        result = decoratePreformatted(result);
         return result;
     }
     
@@ -632,11 +632,11 @@ public class OmiEventConfExtension implements EventConfExtension {
         return result;
     }
     
-    public static String decorateNewlines(String input) {
+    public static String decoratePreformatted(String input) {
         if (input == null) {
             return input;
         }
-        return input.replace("\n", "<br/>");
+        return new StringBuilder("<pre>").append(input).append("</pre>").toString();
     }
     
     public static boolean isGratuitouslyRegexedInteger(final String string) {
