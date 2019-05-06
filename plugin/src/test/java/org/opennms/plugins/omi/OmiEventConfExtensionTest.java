@@ -464,6 +464,53 @@ public class OmiEventConfExtensionTest {
     }
     
     @Test
+    public void canProvideCorrectRegexInAvamarDefinitions() throws IOException {
+        final File policyData = temporaryFolder.newFile("emc_test_policy_data");
+        try (InputStream is = Resources.getResource("emc_test_policy_data").openStream()) {
+            Files.copy(is, policyData.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        OmiDefinitionProvider omiDefProvider = new DefaultOmiDefinitionProvider(temporaryFolder.getRoot(), "");
+        OmiEventConfExtension omiEventConfExtension = new OmiEventConfExtension(omiDefProvider);
+
+        final List<EventDefinition> eventDefs = omiEventConfExtension.getEventDefinitions();
+
+        // Make sure we have the right number
+        assertThat(eventDefs, hasSize(greaterThanOrEqualTo(39)));
+
+        // Look for a specific entry
+        EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "celJServer");
+        assertThat(eventDef, notNullValue());
+        assertThat(eventDef.getPriority(), equalTo(1000));
+        assertThat(eventDef.getLabel(), equalTo("celJServer"));
+        assertThat(eventDef.getSeverity(), equalTo(Severity.MINOR));
+
+        // Validate the log message
+        LogMessage logMessage = eventDef.getLogMessage();
+        assertThat(logMessage, notNullValue());
+        
+        assertThat(logMessage.getContent(), equalTo("%parm[message]%"));
+        assertThat(logMessage.getDestination(), equalTo(LogMsgDestType.LOGONLY));
+
+        // Validate the vbvalue for vbnumber=4. Should end with "...(.*?)", not "...(.*?).*"
+        Mask mask = eventDef.getMask();
+        assertThat(mask, notNullValue());
+        assertThat(mask.getVarbinds().size(), equalTo(1));
+        Varbind vb = mask.getVarbinds().get(0);
+        assertThat(vb.getNumber(), equalTo(4));
+        assertThat(vb.getValues().size(), equalTo(1));
+        assertThat(vb.getValues().get(0), equalTo("~.*(?<month>\\w+?) (?<day>\\w+?) (?<time>\\w+?) (?<year>\\w+?) (?<message>.*?)"));
+
+        // Validate that the APPLICATION and MSGGRP tokens got transformed into event parameters
+        List<Parameter> parameters = eventDef.getParameters();
+        assertThat(parameters, hasSize(equalTo(2)));
+        Parameter applicationParameter = findParameter(parameters, "Application");
+        assertThat(applicationParameter.getValue(), equalTo("EMC"));
+        Parameter msgGrpParameter = findParameter(parameters, "MsgGrp");
+        assertThat(msgGrpParameter.getValue(), equalTo("Storage"));
+    }
+    
+    @Test
     public void canProvideNetIQDefinitions() throws IOException {
         final File policyData = temporaryFolder.newFile("netiq_test_policy_data");
         try (InputStream is = Resources.getResource("netiq_test_policy_data").openStream()) {
@@ -631,7 +678,7 @@ public class OmiEventConfExtensionTest {
         // Now a difficult, real-life example
         omiPattern = "Major:CPU_Busy_Alarm <1*><@.cpu>,<@.workload><1*> due to cpu_busy_alias<*.cpu_busy>,proc_queuelength_alias<*.proc_queue>,<*>workload_cpu_alias<*.workload_cpu>";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo(".*Major:CPU_Busy_Alarm .{1}(?<cpu>\\w+?),(?<workload>\\w+?).{1} due to cpu_busy_alias(?<cpuBusy>.*?),proc_queuelength_alias(?<procQueue>.*?),.*?workload_cpu_alias(?<workloadCpu>.*?).*"));
+                   equalTo(".*Major:CPU_Busy_Alarm .{1}(?<cpu>\\w+?),(?<workload>\\w+?).{1} due to cpu_busy_alias(?<cpuBusy>.*?),proc_queuelength_alias(?<procQueue>.*?),.*?workload_cpu_alias(?<workloadCpu>.*?)"));
     
         // And another real-life one
         omiPattern = "^/<*>/[<*.source>%<@>|<*.source>]$";

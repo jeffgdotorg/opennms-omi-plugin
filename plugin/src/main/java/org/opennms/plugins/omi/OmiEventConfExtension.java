@@ -732,7 +732,7 @@ public class OmiEventConfExtension implements EventConfExtension {
         if (! curVal.startsWith("^") && ! curVal.startsWith(".*")) {
             curVal = ".*" + curVal;
         }
-        if (! curVal.endsWith("$") && ! curVal.endsWith(".*")) {
+        if (! curVal.endsWith("$") && ! curVal.endsWith(".*") && ! curVal.endsWith(".*?") && ! curVal.endsWith(".*?)")) {
             curVal += ".*";
         }
         return curVal;

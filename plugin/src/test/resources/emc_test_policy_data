@@ -1,0 +1,1234 @@
+SYNTAX_VERSION 7
+
+
+SNMP "NNMi: EMC Traps"
+        DESCRIPTION "EMC Traps"
+        SEVERITY Unknown
+        APPLICATION "EMC"
+        MSGGRP "Storage"
+        SUPP_UNM_CONDITIONS
+                DESCRIPTION "Suppress_Unmatched_1139"
+                CONDITION_ID "09fa4fde-cd05-71e0-09a6-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139"
+        MSGCONDITIONS
+                DESCRIPTION "celReboot"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "e348344c-3df1-71e1-0338-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 1
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celReboot
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Data Mover
+Reboots. The trap message includes the facility, event id,
+serverity and a text description of the event.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fe99c170-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celMasterCtlFault"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "75a20e58-3df2-71e1-0338-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 2
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: celMasterCtlFault
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of Master Control
+serious fault unexpected daemon exit or control station heartbeat missing.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fe9c640c-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celHWFailure"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "21202b98-3df3-71e1-0338-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 3
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SEVERITY Major
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: celHWFailure
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of celerra hardware
+failure.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fe9da4c0-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celSlotStale"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "40dc24e6-3df3-71e1-0338-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 4
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celSlotStale
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of celerra stale
+reason code.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fe9eeac4-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celSlotPanicked"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "6c7d940e-3df3-71e1-0338-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 5
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SEVERITY Major
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: celSlotPanicked
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of panicked 
+slot.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fea03078-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celIntfFailure"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "8f73fe58-3df3-71e1-0338-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 6
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SEVERITY Major
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: celIntfFailure
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of both interfaces
+failure.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fea17c8a-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celAAF"
+                CONDITION_ID "bc6b2684-3df3-71e1-0338-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 7
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celAAF
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of AAF.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fea2c48c-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celCSStart"
+                CONDITION_ID "e9bd95fe-3df3-71e1-0338-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 8
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celCSStart
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of Control Station started.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fea4043c-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celJServer"
+                SUPP_DUPL_IDENT_OUTPUT_MSG
+                    "15m"
+                CONDITION_ID "4d94caac-3df4-71e1-0338-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 9
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celJServer
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a JServer alert.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fea54400-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Server_Online"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "b708e7a8-c82d-71e0-15e8-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^29$"
+                        $3 "1"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message> Server <@.server_ip> is online."
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<server_ip>"
+                        TEXT "<message> Server <server_ip> is online."
+                        HELPTEXT "EVENT NAME: celWebGUI_Server_Online
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Server_Online
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fea68be4-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Error_on_Server"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "3586c06e-c82e-71e0-15e8-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^30$"
+                        $3 "1"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message1> Error on <@.server_name> server <@.server_ip>: <*.message2>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<server_ip>"
+                        TEXT "<message1> Error on <server_name> server <server_ip>: <message2>"
+                        HELPTEXT "EVENT NAME: celWebGUI_Error_on_Server
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Error_on_Server
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fea7c6ee-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Critical_2"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "149a37c6-cfe7-71e0-18a3-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^2$"
+                        $3 "1"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SEVERITY Major
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: celWebGUI_Critical_2
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fea901da-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Critical"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "2b5157de-c4fb-71e0-14ca-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $3 "1"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SEVERITY Critical
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: celWebGUI_Critical
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feaa3dfc-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Minor_2"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "3438d566-c4fb-71e0-14ca-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $3 "2"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: celWebGUI_Major
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feab7e4c-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Minor_30"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "f57728fe-ce56-71e0-1782-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^30$"
+                        $3 "3"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message1> server <*.server_ip>: <*.message2>"
+                SET
+                        SEVERITY Major
+                        NODE IP 0.0.0.0  "<server_ip>"
+                        TEXT "<message1> server <server_ip>: <message2>"
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: celWebGUI_Minor_30
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feacbf28-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Minor"
+                SUPP_DUPL_COND
+                    "1h"
+                CONDITION_ID "3d4b0e1c-c4fb-71e0-14ca-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $3 "3"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celWebGUI_Minor
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feadfd0c-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Warning_1"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "2b3866da-cfe5-71e0-18a3-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^1$"
+                        $3 "4"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celWebGUI_Warning_1
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feaf3924-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Warning_4"
+                SUPP_DUPL_COND
+                    "14m" RESEND "15m"
+                CONDITION_ID "dd22c2d8-cfe4-71e0-18a3-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^4$"
+                        $3 "4"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SEVERITY Major
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: celWebGUI_Warning_4
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feb07e4c-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Warning_5"
+                SUPP_DUPL_COND
+                    "14m" RESEND "15m"
+                CONDITION_ID "c570fa88-cfe4-71e0-18a3-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^5$"
+                        $3 "4"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: celWebGUI_Warning_5
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feb1c11c-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Warning_210"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "01932fbe-cfe4-71e0-18a3-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^210$"
+                        $3 "4"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celWebGUI_Warning_210
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feb2fdb6-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Warning_2"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "e833f5b2-fe46-71e0-04fa-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 9
+                        $3 "4"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celWebGUI_Warning
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feb43fd2-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Warning"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "4676d1c4-c4fb-71e0-14ca-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $3 "4"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celWebGUI_Warning
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feb58112-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Normal_1"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "a0ea5262-cf45-71e0-110d-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^1$"
+                        $3 "[5|6]"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celWebGUI_Normal_1
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feb6c3f6-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Normal_18"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "316a58d2-ce56-71e0-1782-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^18$"
+                        $3 "[5|6]"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message1> The VC server <@.server_ip> <*.message2>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<server_ip>"
+                        TEXT "<$MSG_NODE_NAME>: <message1> The VC server <server_ip> <message2>"
+                        HELPTEXT "EVENT NAME: celWebGUI_Normal_18
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feb802f2-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Normal_29"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "7f1db862-ce56-71e0-1782-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^29$"
+                        $3 "[5|6]"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message1> Server <@.server_ip> <*.message2>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<server_ip>"
+                        TEXT "<message1> Server <server_ip> <message2>"
+                        HELPTEXT "EVENT NAME: celWebGUI_Normal_29
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feb94ac2-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Normal_41"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "d3f9e924-cf45-71e0-110d-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^41$"
+                        $3 "[5|6]"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celWebGUI_Normal_41
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feba8e96-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Normal_47"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "94bcc984-cf45-71e0-110d-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^47$"
+                        $3 "[5|6]"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celWebGUI_Normal_47
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "febd879a-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Normal_529"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "bb4ddf70-cf45-71e0-110d-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^529$"
+                        $3 "[5|6]"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SEVERITY Major
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        OPACTION "escalate_message <$MSG_ID>" ANNOTATE
+                        NOTIFICATION
+                        HELPTEXT "EVENT NAME: celWebGUI_Normal_529
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "febecd6c-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Normal_852"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "970d18b6-cfe4-71e0-18a3-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $2 "^852$"
+                        $3 "[5|6]"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celWebGUI_Normal_852
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fec0151e-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_Normal"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "537f2966-c4fb-71e0-14ca-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $3 "[5|6]"
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celWebGUI_Normal
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fec159c4-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_2"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "de515e86-fe46-71e0-04fa-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 9
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celWebGUI
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fec29618-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "celWebGUI_20"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "900ee466-168d-71e4-07f0-0a708dcc0000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $5 "celWebGUI"
+                        $20 "<*>=<*>=<*>=<*>=<*.message>.,"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$21>"
+                        TEXT "<$5>: <message>"
+                        HELPTEXT "EVENT NAME: celWebGUI
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "900ee498-168d-71e4-07f0-0a708dcc0000"
+                DESCRIPTION "celWebGUI"
+                SUPP_DUPL_COND
+                    "15m"
+                CONDITION_ID "17669d4c-c4fb-71e0-14ca-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.2"
+                        $G 6
+                        $S 10
+                        $4 "<@.month> <@.day> <@.time> <@.year> <*.message>"
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<message>"
+                        HELPTEXT "EVENT NAME: celWebGUI
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: Trap message will be sent in the event of a Web GUI 
+notification request.
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fec3d51e-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "connUnitStatusChange"
+                CONDITION_ID "0e0cd66a-735d-71e1-1e7f-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.3"
+                        $G 6
+                        $S 1
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$25>"
+                        APPLICATION "EMC"
+                        MSGGRP "Storage"
+                        TEXT "The status of the connectivity unit (<$3>) has changed to <$1> <$2>."
+                        HELPTEXT "EVENT NAME: connUnitStatusChange
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: The overall status of the connectivity unit has  changed.
+Recommended severity level (for filtering): alert
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fec515dc-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "connUnitDeletedTrap"
+                CONDITION_ID "deab5ce2-735d-71e1-1e7f-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.3"
+                        $G 6
+                        $S 3
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Warning
+                        NODE IP 0.0.0.0  "<$25>"
+                        APPLICATION "EMC"
+                        MSGGRP "Storage"
+                        TEXT "A connUnit has been deleted from this agent."
+                        HELPTEXT "EVENT NAME: connUnitDeletedTrap
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: A connUnit has been deleted from this agent.
+Recommended severity level (for filtering): warning
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fec65aa0-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "connUnitEventTrap"
+                CONDITION_ID "372668da-735e-71e1-1e7f-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.3"
+                        $G 6
+                        $S 4
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Normal
+                        NODE IP 0.0.0.0  "<$25>"
+                        APPLICATION "EMC"
+                        MSGGRP "Storage"
+                        TEXT "<$4>"
+                        HELPTEXT "EVENT NAME: connUnitEventTrap
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: An event has been generated by the connectivity unit.
+Recommended severity level (for filtering): info
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fec79b9a-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "connUnitSensorStatusChange"
+                CONDITION_ID "7235bb92-735e-71e1-1e7f-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.3"
+                        $G 6
+                        $S 5
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$25>"
+                        APPLICATION "EMC"
+                        MSGGRP "Storage"
+                        TEXT "The overall status of the connectivity unit has changed."
+                        HELPTEXT "EVENT NAME: connUnitSensorStatusChange
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: The overall status of the connectivity unit has changed.
+Recommended severity level (for filtering): alert
+
+RECOMMENDED ACTION: Action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "fec8e2c0-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "connUnitPortStatusChange"
+                CONDITION_ID "ba13a15e-735e-71e1-1e7f-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139.3"
+                        $G 6
+                        $S 6
+                SET
+                        SERVERLOGONLY
+                        SEVERITY Minor
+                        NODE IP 0.0.0.0  "<$25>"
+                        APPLICATION "EMC"
+                        MSGGRP "Storage"
+                        TEXT "The port status of the connectivity unit has changed."
+                        HELPTEXT "EVENT NAME: connUnitPortStatusChange
+
+EVENT TYPE: EMC SNMP trap
+
+DESCRIPTION: The port status of the connectivity unit has changed.
+Recommended severity level (for filtering): alert
+
+RECOMMENDED ACTION: No action required.
+
+NOTIFICATION: Alert_Storage@uspto.gov
+
+COMMENTS: 
+
+WEB LINKS: http://www.emc.com/support-training/index.htm
+
+GATHER SCRIPTS:"
+                        HELP "feca2914-3b56-71e3-0a00-0a708dcc0000"
+                DESCRIPTION "EMC_Generic_Event"
+                CONDITION_ID "84f3f738-c4fb-71e0-14ca-0a708d640000"
+                CONDITION
+                        $e ".1.3.6.1.4.1.1139"
+                SET
+                        SERVERLOGONLY
+                        NODE IP 0.0.0.0  "<$25>"
+                        TEXT "<$*>"
