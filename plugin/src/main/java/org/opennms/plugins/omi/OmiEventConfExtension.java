@@ -72,7 +72,7 @@ public class OmiEventConfExtension implements EventConfExtension {
     private static final Pattern BARE_HTTPLINK_PATTERN = Pattern.compile("([^\">])(https?://.*?)([ \n]|$)");
     
     protected static final String TOKEN_ASTERISK_REGEX_EQUIVALENT = ".";
-    protected static final String TOKEN_AT_REGEX_EQUIVALENT = "\\w";
+    protected static final String TOKEN_AT_REGEX_EQUIVALENT = "\\S";
     protected static final String TOKEN_HASH_REGEX_EQUIVALENT = "\\d";
     protected static final String TOKEN_UNDERSCORE_REGEX_EQUIVALENT = "(_|/|\\|:|-)";
     protected static final String TOKEN_SLASH_REGEX_EQUIVALENT = "(\\n|\\r)";
@@ -730,7 +730,7 @@ public class OmiEventConfExtension implements EventConfExtension {
         
         // Now, unless the pattern is anchored to beginning / end, let it be a substring
         if (! curVal.startsWith("^") && ! curVal.startsWith(".*")) {
-            curVal = ".*" + curVal;
+            curVal = ".*?" + curVal;
         }
         if (! curVal.endsWith("$") && ! curVal.endsWith(".*") && ! curVal.endsWith(".*?") && ! curVal.endsWith(".*?)")) {
             curVal += ".*";

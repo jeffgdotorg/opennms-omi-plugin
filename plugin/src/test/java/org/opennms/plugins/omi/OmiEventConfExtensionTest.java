@@ -499,7 +499,7 @@ public class OmiEventConfExtensionTest {
         Varbind vb = mask.getVarbinds().get(0);
         assertThat(vb.getNumber(), equalTo(4));
         assertThat(vb.getValues().size(), equalTo(1));
-        assertThat(vb.getValues().get(0), equalTo("~.*(?<month>\\w+?) (?<day>\\w+?) (?<time>\\w+?) (?<year>\\w+?) (?<message>.*?)"));
+        assertThat(vb.getValues().get(0), equalTo("~.*?(?<month>\\S+?) (?<day>\\S+?) (?<time>\\S+?) (?<year>\\S+?) (?<message>.*?)"));
 
         // Validate that the APPLICATION and MSGGRP tokens got transformed into event parameters
         List<Parameter> parameters = eventDef.getParameters();
@@ -617,7 +617,7 @@ public class OmiEventConfExtensionTest {
         assertThat(vb, notNullValue());
         assertThat(vb.getNumber(), equalTo(1));
         assertThat(vb.getValues().size(), equalTo(1));
-        assertThat(vb.getValues().get(0), equalTo("~^(?<server>\\w+?) - Critical:High_Disk_Response \\w+? (?<message>.*?) at.*"));
+        assertThat(vb.getValues().get(0), equalTo("~^(?<server>\\S+?) - Critical:High_Disk_Response \\S+? (?<message>.*?) at.*"));
         
         // Validate the log message
         logMessage = eventDef.getLogMessage();
@@ -663,27 +663,27 @@ public class OmiEventConfExtensionTest {
         
         // Start with a gimme
         omiPattern = "opener <4*.stuff> closer";
-        assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern), equalTo(".*opener (?<stuff>.{4}) closer.*"));
+        assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern), equalTo(".*?opener (?<stuff>.{4}) closer.*"));
 
         // Now try it with multiple action groups
         omiPattern = "Did <4*.stuff> with <8@.thing> and <16#.tertiary> while <32_> yes I did";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo(".*Did (?<stuff>.{4}) with (?<thing>\\w{8}) and (?<tertiary>\\d{16}) while " + OmiEventConfExtension.TOKEN_UNDERSCORE_REGEX_EQUIVALENT + "{32} yes I did.*"));
+                   equalTo(".*?Did (?<stuff>.{4}) with (?<thing>\\S{8}) and (?<tertiary>\\d{16}) while " + OmiEventConfExtension.TOKEN_UNDERSCORE_REGEX_EQUIVALENT + "{32} yes I did.*"));
         
         // This one challenged me late in development
         omiPattern = "I need a <[foo|bar].thing>, please";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo(".*I need a (?<thing>(foo|bar)), please.*"));
+                   equalTo(".*?I need a (?<thing>(foo|bar)), please.*"));
         
         // Now a difficult, real-life example
         omiPattern = "Major:CPU_Busy_Alarm <1*><@.cpu>,<@.workload><1*> due to cpu_busy_alias<*.cpu_busy>,proc_queuelength_alias<*.proc_queue>,<*>workload_cpu_alias<*.workload_cpu>";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo(".*Major:CPU_Busy_Alarm .{1}(?<cpu>\\w+?),(?<workload>\\w+?).{1} due to cpu_busy_alias(?<cpuBusy>.*?),proc_queuelength_alias(?<procQueue>.*?),.*?workload_cpu_alias(?<workloadCpu>.*?)"));
+                   equalTo(".*?Major:CPU_Busy_Alarm .{1}(?<cpu>\\S+?),(?<workload>\\S+?).{1} due to cpu_busy_alias(?<cpuBusy>.*?),proc_queuelength_alias(?<procQueue>.*?),.*?workload_cpu_alias(?<workloadCpu>.*?)"));
     
         // And another real-life one
         omiPattern = "^/<*>/[<*.source>%<@>|<*.source>]$";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo("^/.*?/((?<source>.*?)%\\w+?|(?<source>.*?))$"));
+                   equalTo("^/.*?/((?<source>.*?)%\\S+?|(?<source>.*?))$"));
     }
     
     @Test
@@ -691,12 +691,12 @@ public class OmiEventConfExtensionTest {
         // Easy one first
         String omiPattern = "This [foo|bar] is whatever";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo(".*This (foo|bar) is whatever.*"));
+                   equalTo(".*?This (foo|bar) is whatever.*"));
         
         // Now a nested few
         omiPattern = "Th[is one|ese[two|three|many]] [is|are] a number";
         assertThat(OmiEventConfExtension.translateOmiPatternToRegex(omiPattern),
-                   equalTo(".*Th(is one|ese(two|three|many)) (is|are) a number.*"));
+                   equalTo(".*?Th(is one|ese(two|three|many)) (is|are) a number.*"));
     }
     
     @Test
