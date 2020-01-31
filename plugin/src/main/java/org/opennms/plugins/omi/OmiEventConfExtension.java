@@ -63,6 +63,8 @@ public class OmiEventConfExtension implements EventConfExtension {
     public static final String AUTO_ACK_USERNAME = "auto-ack";
 
     private static final Logger LOG = LoggerFactory.getLogger(OmiEventConfExtension.class);
+    
+    private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile(" ");
 
     private static final Pattern PLACEHOLDER_PATTERN_POLICYVAR = Pattern.compile("<\\$(\\d+|[*#@ACEeFGSsTVXx]|MSG_TEXT|MSG_ID|MSG_NODE_NAME)>");
     private static final Pattern PLACEHOLDER_PATTERN_USERVAR = Pattern.compile("<([A-Za-z][A-Za-z0-9_-]+)>");
@@ -364,7 +366,7 @@ public class OmiEventConfExtension implements EventConfExtension {
             }
 
             public String getUei() {
-                return UEI_PREFIX + omiTrapDef.getLabel();
+                return SINGLE_SPACE_PATTERN.matcher(UEI_PREFIX + omiTrapDef.getLabel()).replaceAll("_");
             }
 
             public String getLabel() {

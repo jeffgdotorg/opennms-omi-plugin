@@ -32,6 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.opennms.plugins.omi.OmiEventConfExtension.UEI_PREFIX;
 
@@ -262,6 +263,9 @@ public class OmiEventConfExtensionTest {
         // Make sure we have at least 1
         assertThat(eventDefs, hasSize(greaterThanOrEqualTo(1)));
 
+        // Validate that the generated UEIs contain no embedded spaces
+        assertThat(findEventWithUeiContaining(eventDefs, " "), nullValue());
+
         // Look for a specific entry
         EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "NetApp_Link_Up");
         assertThat(eventDef, notNullValue());
@@ -320,6 +324,7 @@ public class OmiEventConfExtensionTest {
         assertThat(applicationParameter.getValue(), equalTo("NetApp"));
         msgGrpParameter = findParameter(parameters, "MsgGrp");
         assertThat(msgGrpParameter.getValue(), equalTo("Storage"));
+        
     }
 
     @Test
@@ -336,6 +341,9 @@ public class OmiEventConfExtensionTest {
 
         // Make sure we have at least 26
         assertThat(eventDefs, hasSize(greaterThanOrEqualTo(26)));
+        
+        // Validate that the generated UEIs contain no embedded spaces
+        assertThat(findEventWithUeiContaining(eventDefs, " "), nullValue());
 
         // Look for a specific entry
         EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "coldStart_Tandberg");
@@ -431,6 +439,9 @@ public class OmiEventConfExtensionTest {
 
         // Make sure we have the right number
         assertThat(eventDefs, hasSize(greaterThanOrEqualTo(4606)));
+        
+        // Validate that the generated UEIs contain no embedded spaces
+        assertThat(findEventWithUeiContaining(eventDefs, " "), nullValue());
 
         // Look for a specific entry
         EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "burmActivityTrap");
@@ -478,6 +489,9 @@ public class OmiEventConfExtensionTest {
         // Make sure we have the right number
         assertThat(eventDefs, hasSize(greaterThanOrEqualTo(39)));
 
+        // Validate that the generated UEIs contain no embedded spaces
+        assertThat(findEventWithUeiContaining(eventDefs, " "), nullValue());
+        
         // Look for a specific entry
         EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "celJServer");
         assertThat(eventDef, notNullValue());
@@ -525,6 +539,9 @@ public class OmiEventConfExtensionTest {
         // Make sure we have the right number
         assertThat(eventDefs, hasSize(equalTo(78)));
 
+        // Validate that the generated UEIs contain no embedded spaces
+        assertThat(findEventWithUeiContaining(eventDefs, " "), nullValue());
+
         // Look for a specific entry
         EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "NetIQWarning_Cisco");
         assertThat(eventDef, notNullValue());
@@ -571,6 +588,9 @@ public class OmiEventConfExtensionTest {
 
         // Make sure we have the right number
         assertThat(eventDefs, hasSize(equalTo(104)));
+
+        // Validate that the generated UEIs contain no embedded spaces
+        assertThat(findEventWithUeiContaining(eventDefs, " "), nullValue());
 
         // Look for a specific entry
         EventDefinition eventDef = findEvent(eventDefs, UEI_PREFIX + "TeamQuest_Event_Test");
@@ -724,5 +744,14 @@ public class OmiEventConfExtensionTest {
 
     private static Parameter findParameter(List<Parameter> parameters, String name) {
         return parameters.stream().filter(p -> Objects.equals(p.getName(), name)).findAny().orElse(null);
+    }
+    
+    private static EventDefinition findEventWithUeiContaining(List<EventDefinition> eventDefs, String needle) {
+        for (EventDefinition def : eventDefs) {
+            if (def.getUei().contains(needle)) {
+                return def;
+            }
+        }
+        return null;
     }
 }
